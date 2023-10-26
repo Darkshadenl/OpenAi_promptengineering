@@ -1,0 +1,12 @@
+{
+  "name": "prompt_engineering",
+  "version": "1.0.0",
+  "description": "Just testing some prompts in parallel",
+  "main": "node.js",
+  "repository": "git@gitlab.com:infi-projects/nijmegen/aia/prompt_engineering.git",
+  "author": "Quinten M <quinten@infi.nl>",
+  "license": "MIT",
+  "dependencies": {
+    "replicate": "^0.20.1"
+  }
+}
