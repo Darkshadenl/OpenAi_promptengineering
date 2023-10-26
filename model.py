@@ -1,5 +1,16 @@
 import replicate
 
+user_system_prompt = ''
+user_max_new_tokens = 128
+user_min_new_tokens = -1
+user_temperature = 0.75
+user_top_p = 0.9
+user_top_k = 50
+user_stop_sequences = None
+user_seed = None
+user_debug = None
+
+
 
 class ModelHandler:
     def __init__(self, model_id, prompt_string):
@@ -22,21 +33,17 @@ class ModelHandler:
 
 class Llama2ChatInput:
 
-    def __init__(self, prompt, system_prompt='You are a helpful assistant.',
-                 max_new_tokens=128, min_new_tokens=-1,
-                 temperature=0.75, top_p=0.9,
-                 top_k=50, stop_sequences=None,
-                 seed=None, debug=None):
-        self.prompt = prompt
-        self.system_prompt = system_prompt
-        self.max_new_tokens = max_new_tokens
-        self.min_new_tokens = min_new_tokens
-        self.temperature = temperature
-        self.top_p = top_p
-        self.top_k = top_k
-        self.stop_sequences = stop_sequences
-        self.seed = seed
-        self.debug = debug
+    def __init__(self, prompt):
+            self.prompt = prompt
+            self.user_system_prompt = user_system_prompt
+            self.user_max_new_tokens = user_max_new_tokens
+            self.user_min_new_tokens = user_min_new_tokens
+            self.user_temperature = user_temperature
+            self.user_top_p = user_top_p
+            self.user_top_k = user_top_k
+            self.user_stop_sequences = user_stop_sequences
+            self.user_seed = user_seed
+            self.debug = user_debug
 
     def to_dict(self):
         return {

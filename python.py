@@ -8,7 +8,16 @@ models = [
         'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
         'meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d'
     ]
-prompt = "write me a joke"
+prompt = """
+[INST]check the inline comments in the code and replace them within the code if you think they are not in line with the code. 
+Replace the text within the <summary></summary>, <param></param> and <returns></returns> blocks with the newly generated comment. 
+Only return anything that is placed between the <RETURNABLE></RETURNABLE> blocks. 
+Comments are not code. Do not add or change any code. COMMENT ONLY.  
+Do not add any new comments. UPDATE EXISTING COMMENTS ONLY. 
+Do not add any text.[/INST]\n${code}
+"""
+
+
 
 
 def check_predictions_status(handlers):
