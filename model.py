@@ -19,7 +19,7 @@ class ModelHandler:
         self.model_split = model_id.split(':')
         self.model = replicate.models.get(self.model_split[0])
         self.version = self.model.versions.get(self.model_split[1])
-        self.input = Llama2ChatInput(prompt_string)
+        self.input = Llama2ChatInput(prompt_string)  # TODO Inject this input class
         self.console_controller = console_controller
         self.start_time = None
         self.processing_start_time = None
