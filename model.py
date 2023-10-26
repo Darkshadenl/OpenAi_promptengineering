@@ -1,7 +1,10 @@
 class Llama2ChatInput:
 
-    def __init__(self, prompt, system_prompt, max_new_tokens, min_new_tokens,
-                 temperature, top_p, top_k, stop_sequences, seed, debug):
+    def __init__(self, prompt, system_prompt='You are a helpful assistant.',
+                 max_new_tokens=128, min_new_tokens=-1,
+                 temperature=0.75, top_p=0.9,
+                 top_k=50, stop_sequences=None,
+                 seed=None, debug=None):
         self.prompt = prompt
         self.system_prompt = system_prompt
         self.max_new_tokens = max_new_tokens
@@ -15,14 +18,7 @@ class Llama2ChatInput:
 
     def to_dict(self):
         return {
-            'prompt': self.prompt,
-            'system_prompt': self.system_prompt,
-            'max_new_tokens': self.max_new_tokens,
-            'min_new_tokens': self.min_new_tokens,
-            'temperature': self.temperature,
-            'top_p': self.top_p,
-            'top_k': self.top_k,
-            'stop_sequences': self.stop_sequences,
-            'seed': self.seed,
-            'debug': self.debug
+            key: value
+            for key, value in vars(self).items()
+            if value is not None
         }

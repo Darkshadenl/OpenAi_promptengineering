@@ -5,6 +5,14 @@ from model import Llama2ChatInput
 
 load_dotenv()
 
+models = [
+        'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+        'meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d'
+    ]
+prompt = "write me a joke"
+
+
+
 
 class ModelHandler:
     def __init__(self, model_id, prompt):
@@ -39,12 +47,6 @@ def print_prediction_results(handlers):
 
 
 def main():
-    models = [
-        'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-        'meta/llama-2-13b-chat:f4e2de70d66816a838a89eeeb621910adffb0dd0baba3976c96980970978018d'
-    ]
-    prompt = "write me a joke"
-
     handlers = [ModelHandler(model_id, prompt) for model_id in models]
 
     for handler in handlers:
