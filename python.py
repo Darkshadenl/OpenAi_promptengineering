@@ -1,7 +1,6 @@
 import time
 from dotenv import load_dotenv
-import replicate
-from model import Llama2ChatInput
+from model import ModelHandler
 
 load_dotenv()
 
@@ -12,27 +11,6 @@ models = [
 prompt = "write me a joke"
 
 
-
-
-class ModelHandler:
-    def __init__(self, model_id, prompt):
-        self.prediction = None
-        self.model_split = model_id.split(':')
-        self.model = replicate.models.get(self.model_split[0])
-        self.version = self.model.versions.get(self.model_split[1])
-        self.input = Llama2ChatInput(prompt)
-
-    def create_prediction(self):
-        self.prediction = replicate.predictions.create(
-            version=self.version,
-            input=self.input.to_dict()
-        )
-
-    def print_prediction_status(self):
-        status_color = '\033[92m' if self.prediction.status == 'succeeded' else '\033[91m'
-        print(f'\033[92m{self.model.id}\033[0m status: {status_color}{self.prediction.status}\033[0m')
-
-
 def check_predictions_status(handlers):
     for handler in handlers:
         handler.prediction.reload()
@@ -41,7 +19,7 @@ def check_predictions_status(handlers):
 
 def print_prediction_results(handlers):
     for handler in handlers:
-        print(f'\n{handler.model.id} results:\n')
+        print(f'\n\033[92m{handler.model.id}\033[0m results:\n')
         for item in handler.prediction.output:
             print(item, end="")
 
