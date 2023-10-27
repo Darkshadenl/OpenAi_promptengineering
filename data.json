@@ -1,0 +1,8 @@
+{
+  "prompts": [
+      "[INST]\nCheck the comments in the given piece of code. If the comments are not correct, update them.\nReplace the text within the <summary></summary>, <param></param> and <returns></returns> blocks with the newly generated comment\nif one is applicable. \nOnly return the text within <RETURNABLE></RETURNABLE> blocks. \nComments are not code. Do not add or change any code. COMMENT ONLY.  \nDo not add any new comments. UPDATE EXISTING COMMENTS ONLY. \nDo not add any text.[/INST]\\n\n${code}"
+  ],
+  "codes": [
+      "<RETURNABLE>\n/// <summary>\n/// Finds the minimum of two integers.\n/// </summary>\n/// <param name=\"a\">The first integer.</param>\n/// <param name=\"b\">The second integer.</param>\n/// <returns>The minimum of the two integers.</returns>\npublic int FindMax(int a, int b)\n</RETURNABLE>\n{\n    return (a > b) ? a : b;    // sdjofsjdfsdf\n}"
+  ]
+}
