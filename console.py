@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from model import ModelHandler
+from replicate_model_handler import ReplicateModelHandler
 
 
 class ConsoleController:
@@ -37,10 +37,10 @@ class ConsoleController:
         print(f"Start time: {self.start_time}")
 
 
-    def print_model_processing_time(self, model: ModelHandler):
+    def print_model_processing_time(self, model: ReplicateModelHandler):
         print(f"\033[92m{model.model.id}\033[0m processing time: {model.end_time - model.processing_start_time}")
 
-    def print_model_elapsed_time(self, model: ModelHandler):
+    def print_model_elapsed_time(self, model: ReplicateModelHandler):
         print(f"\033[92m{model.model.id}\033[0m elapsed time: {model.end_time - model.start_time}")
 
     def print_and_save_total_end_time(self):

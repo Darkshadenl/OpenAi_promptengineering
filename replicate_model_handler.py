@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import replicate
 
 user_system_prompt = '''
@@ -20,7 +19,7 @@ user_seed = None
 user_debug = True
 
 
-class ModelHandler:
+class ReplicateModelHandler:
     def __init__(self, model_id, prompt_string, console_controller):
         self.prediction = None
         self.model_split = model_id.split(':')
