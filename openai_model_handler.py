@@ -20,8 +20,8 @@ user_seed = None
 user_debug = True
 
 
-class ReplicateModelHandler:
-    def __init__(self, model_id, prompt_string, console_controller):
+class OpenAiModelHandler:
+    def __init__(self, prompt_string, console_controller):
         self.prediction = None
         self.model = "gpt-3.5-turbo"
         self.input = ChatGptInput(prompt_string)  # TODO Inject this input class
@@ -32,18 +32,7 @@ class ReplicateModelHandler:
 
     def create_prediction(self):
         self.prediction = openai.ChatCompletion.create(
-            model=self.model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": self.input.system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": self.input.prompt
-                }
-            ],
-
+            **self.input.to_dict()
         )
         self.start_time = datetime.now()
 
@@ -66,6 +55,7 @@ class ChatGptInput:
     def __init__(self, prompt):
         self.prompt = prompt
         self.system_prompt = user_system_prompt
+        self.model = "gpt-3.5-turbo"
 
         # Number between -2.0 and 2.0.
         # Positive values penalize new tokens based on their existing frequency in the text so far,
@@ -88,7 +78,7 @@ class ChatGptInput:
         self.stop = None
 
         # If set, partial message deltas will be sent
-        self.stream = None
+        self.stream = True
 
         # What sampling temperature to use, between 0 and 2.
         self.temperature = user_temperature
@@ -105,8 +95,20 @@ class ChatGptInput:
 
     def to_dict(self):
         thedict = {
-            key: value
-            for key, value in vars(self).items()
-            if value is not None
+            "model": "gpt-3.5-turbo",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": self.system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": self.prompt
+                }
+            ]
         }
+        thedict.update(
+            {key: value
+             for key, value in vars(self).items()
+             if value is not None and key not in ["system_prompt", "prompt"]})
         return thedict
