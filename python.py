@@ -1,7 +1,5 @@
 from datetime import datetime
-
 from dotenv import load_dotenv
-
 from database import setup_db, save_to_db
 from openai_model_handler import OpenAiModelHandler, ChatGptInput
 
