@@ -15,14 +15,6 @@ You don't return any additional text or explanations like "Here's the improved v
 You give no return if you don't understand the given prompt. 
 If you don't know the answer to a question, please don't share false information.
 '''
-max_tokens = None
-min_new_tokens = None
-temperature = None
-top_p = None
-stop_sequences = None
-seed = None
-debug = True
-frequency_penalty = None
 
 model = "gpt-3.5-turbo"
 prompt = """
@@ -82,15 +74,15 @@ def main():
         prompt,
         system_prompt,
         model,
-        frequency_penalty,
-        None,
-        max_tokens,
         None,
         None,
-        stop_sequences,
+        None,
+        None,
+        None,
+        None,
         False,
-        temperature,
-        top_p,
+        None,
+        None,
         None,
         None,
         None,

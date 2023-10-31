@@ -1,8 +1,24 @@
 
 class ChatGptInput:
     # https://platform.openai.com/docs/api-reference/chat/create
-    def __init__(self, prompt, system_prompt, model, frequency_penalty, logit_bias, max_tokens, n,
-                 presence_penalty, stop, stream, temperature, top_p, user, function_call, functions):
+    def __init__(
+            self,
+            prompt,
+            system_prompt,
+            model,
+            frequency_penalty=None,
+            logit_bias=None,
+            max_tokens=None,
+            n=None,
+            presence_penalty=None,
+            stop=None,
+            stream=False,
+            temperature=None,
+            top_p=None,
+            user=None,
+            function_call=None,
+            functions=None
+    ):
         # Prompt for the conversation.
         self.prompt = prompt
 
