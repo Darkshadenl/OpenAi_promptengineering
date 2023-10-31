@@ -1,8 +1,9 @@
 from datetime import datetime
+
+import tiktoken
 from dotenv import load_dotenv
 from database import setup_db, save_to_db
 from openai_model_handler import OpenAiModelHandler, ChatGptInput
-
 
 load_dotenv()
 
@@ -10,7 +11,6 @@ system_prompt = '''
 You are a Typescript professional. 
 You don't return any additional text or explanations like "Here's the improved version".
 You give no return if you don't understand the given prompt. 
-If you don't know the answer to a question, please don't share false information.
 '''
 
 model = "gpt-3.5-turbo"
@@ -19,7 +19,7 @@ The task is to update existing code comments based on the corresponding code.
 We assume that the code is correct and always the source of truth. 
 If there is a discrepancy between the code and the comment, the comment is considered incorrect and needs to be updated 
 to align with the code.
-If this piece of code is given:
+example, If this piece of code is given:
 /// <summary>
 /// Checks if a string contains only alphabets.
 /// </summary>
@@ -42,37 +42,52 @@ You place returnable tags and only return the comment and signature of the class
 public bool IsPalindrome(string str)
 </RETURNABLE>
 
+
+If a bigger piece of code is given (like a class), you should return multiple comments.  
+
 Here's the code that you have to correct:
 ${code} 
 """
 code = """
 /// <summary>
-/// Converts a string to uppercase.
+/// Reverses an array of strings.
 /// </summary>
-/// <param name="input">The string to reverse</param>
-/// <returns>The reversed string</returns>
-public string ReverseString(string input)
+/// <param name="strings">The array of strings</param>
+/// <returns>The concatenated string</returns>
+public string ConcatenateStrings(string[] strings)
 {
-    char[] charArray = input.ToCharArray();
-    Array.Reverse(charArray);
-    return new string(charArray);
+    return string.Join("", strings);
 }
 
 """
-prompt = prompt.replace('${code}', code)
+
+
+def num_tokens_from_string(string: str) -> int:
+    """Returns the number of tokens in a text string."""
+    encoding = tiktoken.encoding_for_model('gpt-3.5-turbo')
+    num_tokens = len(encoding.encode(string))
+    return num_tokens
 
 
 def main():
+    p = prompt.replace('${code}', code)
     gpt_input = ChatGptInput(
-        prompt,
+        p,
         system_prompt,
         model,
     )
     handler = OpenAiModelHandler(gpt_input)
 
+    prompt_tokens = num_tokens_from_string(p)
+    system_tokens = num_tokens_from_string(system_prompt)
+    total_tokens = prompt_tokens + system_tokens
+    print(f"Number of tokens: {total_tokens}")
+
     start_time = datetime.now()
     handler.create_prediction()
     end_time = datetime.now()
+    total_time = end_time - start_time
+    print(f"Total time: {total_time}")
 
     message = handler.completion.choices[0].message
     print(message.content + "\n")
@@ -82,7 +97,7 @@ def main():
     if user_correct == 'y':
         correct = True
 
-    save_to_db(start_time, end_time, prompt, system_prompt, message.content, correct)
+    save_to_db(str(total_time), p, system_prompt, message.content, total_tokens, correct)
 
 
 if __name__ == '__main__':

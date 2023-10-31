@@ -1,13 +1,13 @@
 import sqlite3
 
 
-def save_to_db(start_time, end_time, prompt, system_prompt, message_content, correct=False):
+def save_to_db(total_time, prompt, system_prompt, message_content, total_tokens, correct=False):
     conn = sqlite3.connect('openai_model_handler.db')
     cursor = conn.cursor()
     cursor.execute('''
-    INSERT INTO requests (start_time, end_time, prompt, system_prompt, message_content, correct)
+    INSERT INTO requests (prompt, system_prompt, message_content, total_tokens, total_time, correct)
     VALUES (?, ?, ?, ?, ?, ?);
-    ''', (start_time, end_time, prompt, system_prompt, message_content, correct))
+    ''', (prompt, system_prompt, message_content, total_tokens, total_time, correct))
     conn.commit()
     conn.close()
 
@@ -18,16 +18,14 @@ def setup_db():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        start_time DATETIME,
-        end_time DATETIME,
         prompt TEXT,
         system_prompt TEXT,
-        message_content TEXT
+        message_content TEXT,
+        total_tokens INTEGER,
+        total_time TEXT,
+        correct BOOLEAN
     );
     ''')
-    cursor.execute('''
-        ALTER TABLE requests ADD COLUMN correct BOOLEAN;
-        ''')
     conn.commit()
     conn.close()
 
