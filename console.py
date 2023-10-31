@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
-
-from replicate_model_handler import ReplicateModelHandler
+from openai_model_handler import OpenAiModelHandler
 
 
 class ConsoleController:
@@ -15,8 +14,8 @@ class ConsoleController:
         self.print_and_save_total_end_time()
         self.print_and_save_total_elapsed_time()
         print("\n")
-        [self.print_model_processing_time(handler) for handler in handlers]
-        [self.print_model_elapsed_time(handler) for handler in handlers]
+        # [self.print_model_processing_time(handler) for handler in handlers]
+        # [self.print_model_elapsed_time(handler) for handler in handlers]
         self.print_prediction_results(handlers)
 
     def print_prediction_results(self, handlers):
@@ -37,11 +36,11 @@ class ConsoleController:
         print(f"Start time: {self.start_time}")
 
 
-    def print_model_processing_time(self, model: ReplicateModelHandler):
-        print(f"\033[92m{model.model.id}\033[0m processing time: {model.end_time - model.processing_start_time}")
-
-    def print_model_elapsed_time(self, model: ReplicateModelHandler):
-        print(f"\033[92m{model.model.id}\033[0m elapsed time: {model.end_time - model.start_time}")
+    # def print_model_processing_time(self, model: OpenAiModelHandler):
+    #     print(f"\033[92m{model.model.id}\033[0m processing time: {model.end_time - model.processing_start_time}")
+    #
+    # def print_model_elapsed_time(self, model: OpenAiModelHandler):
+    #     print(f"\033[92m{model.model.id}\033[0m elapsed time: {model.end_time - model.start_time}")
 
     def print_and_save_total_end_time(self):
         self.end_time = datetime.now()
