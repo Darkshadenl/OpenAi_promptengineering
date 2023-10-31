@@ -14,18 +14,7 @@ class OpenAiModelHandler:
     def create_prediction(self):
         print("start ai call")
         self.completion = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system",
-                    "content": self.input.system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": self.input.prompt
-                }
-            ],
-            stream=False
+            **self.input.to_dict()
         )
         print("end ai call")
 
