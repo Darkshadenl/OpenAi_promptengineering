@@ -67,18 +67,6 @@ def main():
         prompt,
         system_prompt,
         model,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        False,
-        None,
-        None,
-        None,
-        None,
-        None,
     )
     handler = OpenAiModelHandler(gpt_input)
 
