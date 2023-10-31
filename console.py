@@ -22,7 +22,7 @@ class ConsoleController:
     def print_prediction_results(self, handlers):
         for handler in handlers:
             print(f'\n\033[92m{handler.model.id}\033[0m results:\n')
-            for item in handler.prediction.output:
+            for item in handler.completion.output:
                 print(item, end="")
 
     def print_prediction_status(self, status, model_name):
