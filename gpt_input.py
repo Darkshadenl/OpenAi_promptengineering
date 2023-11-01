@@ -73,7 +73,7 @@ class ChatGptInput:
 
     def to_dict(self):
         thedict = {
-            "model": "gpt-3.5-turbo",
+            "model": self.model,
             "messages": [
                 {
                     "role": "system",
