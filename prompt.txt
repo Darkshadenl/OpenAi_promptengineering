@@ -1,0 +1,37 @@
+
+Only return the signature and comment of the class/functions which have a comment.
+Ignore any class/functions which don't have a comment.
+Then put them in a simple list which looks like this
+(replace <<SIGNATURE>> with the signature, replace <<COMMENT>> with the comment):
+<RETURN>
+<<COMMENT>>
+<<SIGNATURE>>
+</RETURN>
+<RETURN>
+<<COMMENT>>
+<<SIGNATURE>>
+</RETURN>
+
+An example of a <RETURN> is:
+<RETURN>
+/**
+    * This is the MoneyController class which handles API requests related to hours.
+    */
+    @Authenticated()
+    @Controller('api/hours')
+    export class HourController {
+</RETURN>
+<RETURN>
+/**
+   * Retrieves the months data based on the provided week year and week number.
+   *
+   * @param weekYear - The year of the week.
+   * @param weekNumber - The number of the week.
+   * @returns The data for the specified week.
+   */
+  @Get('week/:weekYear/:weekNumber')
+  getWeek(@Param('weekYear') weekYear: number, @Param('weekNumber') weekNumber: number) {
+</RETURN>
+
+Now go and do it for the following code:
+${code}
