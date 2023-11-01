@@ -1,10 +1,49 @@
-/// <summary>
-/// Bereken het verschil van twee getallen.
-/// </summary>
-/// <param name="a">Eerste getal</param>
-/// <param name="b">Tweede getal</param>
-/// <returns>De som van a en b</returns>
-public int Add(int a, int b)
-{
-    return a + b;
+/**
+ * Dit is een eenvoudige TypeScript-klasse genaamd "BerryClass".
+ * De klasse bevat geen functies. Die worden later toegevoegd.
+ */
+class ExampleClass {
+  private value: number;
+
+  /**
+   * Constructor voor ExampleClass.
+   * @param val De initiële waarde voor het "value"-veld.
+   */
+  constructor(initialValue: number) {
+    this.value = initialValue;
+  }
+
+  /**
+   * Een eenvoudige functie om de huidige waarde op te halen.
+   * @returns De huidige waarde.
+   */
+  getValue(): number {
+    return this.value;
+  }
+
+  /**
+   * Een functie om de waarde te verhogen met een opgegeven getal.
+   * @param increment Het getal waarmee de waarde wordt verhoogd.
+   */
+  increaseValue(increment: number): void {
+    this.value += increment;
+  }
+
+  /**
+   * Een functie om de waarde te verlagen met een opgegeven getal.
+   * @param decrement Het getal waarmee de waarde wordt verlaagd.
+   */
+  decreaseValue(decrement: number): void {
+    this.value -= decrement;    // verhoog de waarde
+  }
+
+  // Dit is een interne hulpmethode zonder commentaar.
+  private resetValue(): void {
+    this.value = 0;
+  }
+
+  // Dit is een interne hulpmethode zonder commentaar.
+  private multiplyValue(factor: number): void {
+    this.value *= factor;
+  }
 }
