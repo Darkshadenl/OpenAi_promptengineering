@@ -52,28 +52,28 @@ async def main():
         handlers.append(OpenAiModelHandler(gpt_input))
 
     global_start_time = datetime.now()
+    print("\x1b[31mStarting predictions...\x1b[0m")
     await create_predictions_for_all(handlers)
+    print("\x1b[32mFinished predictions!\x1b[0m")
     global_end_time = datetime.now()
     global_total_time = global_end_time - global_start_time
-    print(f"Total time: {global_total_time}")
+    print(f"Total time: {global_total_time}\n")
 
     for handler in handlers:
         handler_message = handler.completion.choices[0].message
         handler.output_tokens = num_tokens_from_string(handler_message.content)
         print(f"Number of output tokens for {handler.input.model}: {handler.output_tokens}")
-        print(f"{handler.input.model} took {handler.total_time} seconds. Results:")
+        print(f"\x1b[32m{handler.input.model}\x1b[0m took \x1b[34m{handler.total_time}\x1b[0m seconds. Results:\n")
         print(handler_message.content + "\n")
 
 
     for handler in handlers:
-        user_correct = input(f"Was {handler.input.model}'s output Correct? y/n")
+        user_correct = input(f"\x1b[31mWas {handler.input.model}'s output Correct? y/n\x1b[0m")
         correct = False
 
         if user_correct == 'y':
             correct = True
-        handler_message = handler.completion.choices[0].message
-        save_to_db(str(handler.total_time), prompt_w_code, system_prompt, handler_message.content,
-                   total_input_tokens, handler.output_tokens, correct)
+        save_to_db(handler, prompt_w_code, system_prompt, total_input_tokens, correct)
 
 
 

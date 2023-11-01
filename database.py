@@ -1,11 +1,15 @@
 import sqlite3
 
+from openai_model_handler import OpenAiModelHandler
 
-def save_to_db(total_time, prompt, system_prompt, message_content, total_input_tokens, total_output_tokens, correct=False):
+
+def save_to_db(handler: OpenAiModelHandler, prompt, system_prompt, total_input_tokens, correct=False):
+    handler_message = handler.completion.choices[0].message
     conn = sqlite3.connect('openai_model_handler.db')
     cursor = conn.cursor()
     cursor.execute('''
     INSERT INTO requests (
+        model,
         prompt,
         system_prompt,
         message_content,
@@ -14,8 +18,9 @@ def save_to_db(total_time, prompt, system_prompt, message_content, total_input_t
         total_time,
         correct
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?);
-    ''', (prompt, system_prompt, message_content, total_input_tokens, total_output_tokens, total_time, correct))
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    ''', (handler.input.model, prompt, system_prompt, handler_message.content, total_input_tokens,
+          handler.output_tokens, str(handler.total_time), correct))
     conn.commit()
     conn.close()
 
@@ -26,6 +31,7 @@ def setup_db():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        model TEXT,
         prompt TEXT,
         system_prompt TEXT,
         message_content TEXT,
