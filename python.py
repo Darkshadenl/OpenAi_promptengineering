@@ -21,7 +21,10 @@ def get_text_file_string(filename) -> str:
 
 
 async def create_predictions_for_all(objects):
-    await asyncio.gather(*(obj.create_prediction() for obj in objects))
+    # Start the prediction tasks
+    prediction_tasks = asyncio.gather(*(obj.create_prediction_with_status(5) for obj in objects))
+    # Wait for all prediction tasks to complete
+    await prediction_tasks
 
 
 async def main():
@@ -60,7 +63,6 @@ async def main():
         print(f"Number of output tokens for {handler.input.model}: {handler.output_tokens}")
         print(f"\x1b[32m{handler.input.model}\x1b[0m took \x1b[34m{handler.total_time}\x1b[0m seconds. Results:\n")
         print(handler_message.content + "\n")
-
 
     for handler in handlers:
         user_correct = input(f"\x1b[31mWas {handler.input.model}'s output Correct? y/n\x1b[0m")

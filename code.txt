@@ -1,49 +1,153 @@
+
 /**
- * Dit is een eenvoudige TypeScript-klasse genaamd "BerryClass".
- * De klasse bevat geen functies. Die worden later toegevoegd.
+ * This is the MoneyController class which handles API requests related to hours.
  */
-class ExampleClass {
-  private value: number;
+@Authenticated()
+@Controller('api/hours')
+export class HourController {
+  constructor(private readonly service: HourService, private readonly simplicate: SimplicateAdapter) {}
 
-  /**
-   * Constructor voor ExampleClass.
-   * @param val De initiële waarde voor het "value"-veld.
-   */
-  constructor(initialValue: number) {
-    this.value = initialValue;
+  @Get('date/:start/:end')
+  getRange(@Param('start') start: string, @Param('end') end: string) {
+    const startDate = DateTime.fromFormat(start, 'yyyy-MM-dd');
+    const endDate = DateTime.fromFormat(end, 'yyyy-MM-dd').endOf('day');
+
+    return this.service.find(startDate, endDate);
   }
 
   /**
-   * Een eenvoudige functie om de huidige waarde op te halen.
-   * @returns De huidige waarde.
+   * Retrieves the months data based on the provided week year and week number.
+   *
+   * @param weekYear - The year of the week.
+   * @param weekNumber - The number of the week.
+   * @returns The data for the specified week.
    */
-  getValue(): number {
-    return this.value;
+  @Get('week/:weekYear/:weekNumber')
+  getWeek(@Param('weekYear') weekYear: number, @Param('weekNumber') weekNumber: number) {
+    const startDate = DateTime.fromObject({ weekYear, weekNumber }).startOf('week');
+    const endDate = startDate.endOf('week');
+    return this.service.find(startDate, endDate);
   }
 
-  /**
-   * Een functie om de waarde te verhogen met een opgegeven getal.
-   * @param increment Het getal waarmee de waarde wordt verhoogd.
-   */
-  increaseValue(increment: number): void {
-    this.value += increment;
+  @Get('month/:year/:month')
+  async getMonth(@Param('year') year: number, @Param('month') month: number) {
+    const startDate = DateTime.fromObject({ year, month, day: 1 });
+    const endDate = startDate.endOf('month');
+
+    return this.service.find(startDate, endDate);
   }
 
-  /**
-   * Een functie om de waarde te verlagen met een opgegeven getal.
-   * @param decrement Het getal waarmee de waarde wordt verlaagd.
-   */
-  decreaseValue(decrement: number): void {
-    this.value -= decrement;    // verhoog de waarde
+  @Post('cross/invoices/:year/:month')
+  async createInvoices(@Param('year') year: number, @Param('month') month: number): Promise<void> {
+    const invoiceData = await this.collectInvoiceData(year, month);
+    await Promise.all(invoiceData.invoices.map((data) => this.simplicate.postInvoice(data)));
   }
 
-  // Dit is een interne hulpmethode zonder commentaar.
-  private resetValue(): void {
-    this.value = 0;
+  @Get('cross/invoices/:year/:month')
+  async collectInvoiceData(
+    @Param('year') year: number,
+    @Param('month') month: number
+  ): Promise<{ invoiced: CrossInvoiceHours[]; uninvoiced: CrossInvoiceHours[]; invoices: InvoiceDto[] }> {
+    const invoiced = await this.getCross(year, month, { invoiced: true });
+    const uninvoiced = await this.getCross(year, month, { uninvoiced: true });
+    const invoices = await Promise.all(
+      invoiced.map(async (cross) => {
+        const my_organization_profile_id = cross.supplierMyOrganizationProfileId;
+        const organization = await this.simplicate.getOrganization(cross.vendorId);
+        const payment_term_id = organization.debtor?.payment_term.id;
+        const vat_class = await this.simplicate.getVatClass('0%');
+        const status = await this.simplicate.getInvoiceStatus('Draft');
+        const revenue_group = await this.simplicate.getRevenueGroup('Algemeen');
+        const invoice_lines: CreateInvoiceLineDto[] = cross.projects.flatMap((project) =>
+          project.services.map((service) => ({
+            date: DateTime.now().toFormat('yyyy-MM-dd'),
+            description: project.name + ': ' + service.name,
+            amount: service.totalDuration,
+            price: service.totalAmount / service.totalDuration,
+            vat_class_id: vat_class.id,
+            revenue_group_id: revenue_group.id,
+          }))
+        );
+        const organization_id = cross.vendorId;
+        const status_id = status.id;
+        const invoice: CreateInvoiceDto = {
+          date: DateTime.now().toFormat('yyyy-MM-dd'),
+          subject: `Werkzaamheden van ${cross.supplierName} voor ${cross.vendorName} in ${year}-${month}`,
+          reference: `INF-CROSS-${year}-${month}`,
+          my_organization_profile_id,
+          organization_id,
+          payment_term_id,
+          invoice_lines,
+          status_id,
+          sending_method: 'email',
+        };
+        return invoice;
+      })
+    );
+    return { invoiced, uninvoiced, invoices };
   }
 
-  // Dit is een interne hulpmethode zonder commentaar.
-  private multiplyValue(factor: number): void {
-    this.value *= factor;
+  @Get('cross/:year/:month')
+  async getCross(
+    @Param('year') year: number,
+    @Param('month') month: number,
+    @Query() query: { invoiced?: unknown; uninvoiced?: unknown }
+  ): Promise<CrossInvoiceHours[]> {
+    const startDate = DateTime.fromObject({ year, month, day: 1 });
+    const endDate = startDate.endOf('month');
+    const showInvoicedOnly = 'invoiced' in query;
+    const showUninvoicedOnly = 'uninvoiced' in query;
+    const hours = await this.service.find(startDate, endDate);
+    return hours
+      .filter(
+        (hour) =>
+          hour.vendorId &&
+          hour.vendorId !== hour.supplierId &&
+          (!(showInvoicedOnly || showUninvoicedOnly) ||
+            (showInvoicedOnly && hour.isInvoiced) ||
+            (showUninvoicedOnly && !hour.isInvoiced))
+      )
+      .reduce<CrossInvoiceHours[]>((accu, hour) => {
+        let invoice = accu.find((i) => i.vendorName === hour.vendorName && i.supplierName === hour.supplierName);
+        if (!invoice) {
+          invoice = {
+            vendorId: hour.vendorId,
+            vendorName: hour.vendorName,
+            supplierName: hour.supplierName,
+            supplierId: hour.supplierId,
+            supplierMyOrganizationProfileId: hour.supplierMyOrganizationProfileId,
+            totalAmount: 0,
+            totalDuration: 0,
+            projects: [],
+          };
+          accu.push(invoice);
+        }
+        let project = invoice.projects.find((p) => p.name === hour.customerName + ':' + hour.projectName);
+        if (!project) {
+          project = {
+            name: hour.customerName + ':' + hour.projectName,
+            totalDuration: 0,
+            totalAmount: 0,
+            services: [],
+          };
+          invoice.projects.push(project);
+        }
+        let service = project.services.find((s) => s.name == hour.serviceName + ' @ ' + hour.rate);
+        if (!service) {
+          service = { name: hour.serviceName + ' @ ' + hour.rate, totalDuration: 0, totalAmount: 0, hours: [] };
+          project.services.push(service);
+        }
+
+        const { durationHours, rate } = hour;
+        invoice.totalAmount += durationHours * rate;
+        invoice.totalDuration += durationHours;
+        project.totalAmount += durationHours * rate;
+        project.totalDuration += durationHours;
+        service.totalAmount += durationHours * rate;
+        service.totalDuration += durationHours;
+        service.hours.push(hour);
+
+        return accu;
+      }, []);
   }
 }
