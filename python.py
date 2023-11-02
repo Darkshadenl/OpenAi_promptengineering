@@ -3,10 +3,12 @@ import tiktoken
 from dotenv import load_dotenv
 from database import setup_db, save_to_db
 from openai_model_handler import OpenAiModelHandler, ChatGptInput
+from time_tracker import Timetracker
 import asyncio
 
 load_dotenv()
 models = ["gpt-4"]
+time_tracker = Timetracker()
 
 
 def num_tokens_from_string(string: str) -> int:
@@ -55,16 +57,12 @@ async def main():
     total_input_tokens += num_tokens_from_string(system_prompt)
     print("\033[92m" + f"Number of input tokens: {total_input_tokens}" + "\033[0m")
 
-    global_start_time = datetime.now()
-    print(f"\x1b[31mStarting predictions at {global_start_time}...\x1b[0m")
+    time_tracker.start()
 
     await create_predictions_for_all(handlers)
 
-
-    global_end_time = datetime.now()
-    print(f"\x1b[32mFinished predictions at {global_end_time}!\x1b[0m")
-    global_total_time = global_end_time - global_start_time
-    print(f"Total time: {global_total_time}\n")
+    time_tracker.stop()
+    print(f"Total time: {time_tracker.total_time}\n")
 
     for handler in handlers:
         handler_message = handler.completion.choices[0].message

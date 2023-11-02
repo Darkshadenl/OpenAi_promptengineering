@@ -17,6 +17,7 @@ class OpenAiModelHandler:
 
     async def create_prediction(self):
         start_time = datetime.now()
+        x = self.input.to_dict()
         self.completion = await self.client.chat.completions.create(
             **self.input.to_dict()
         )

@@ -98,5 +98,5 @@ class ChatGptInput:
         thedict.update(
             {key: value
              for key, value in vars(self).items()
-             if value is not None and key not in ["system_prompt", "prompt"]})
+             if value is not None and key not in ["system_prompt", "prompt", "total_tokens"]})
         return thedict
