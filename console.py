@@ -4,7 +4,10 @@ from openai_model_handler import OpenAiModelHandler
 def print_non_system_input_of_handler(handler):
     for messageDict in handler.input.messages:
         if messageDict['role'] != "system":
-            print(f"{str(messageDict['role']).capitalize()}:\n{messageDict['content']}")
+            if messageDict['role'] == "user":
+                print(f"{str(messageDict['role']).capitalize()}:\n{messageDict['content']}\n\n")
+            if messageDict['role'] == "assistant":
+                print("\033[34m" + f"{str(messageDict['role']).capitalize()}:\n{messageDict['content']}\n\n" + "\033[0m")
 
 
 def print_total_input_tokens_of_handler(handler: OpenAiModelHandler):

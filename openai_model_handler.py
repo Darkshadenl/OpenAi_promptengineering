@@ -69,7 +69,7 @@ class OpenAiModelHandler:
             end_time = datetime.strptime(self.start_end_times[i][1], format)
             total_time += (end_time - start_time).total_seconds()
 
-        return total_time
+        self.total_time = total_time
 
     async def create_prediction_with_status(self, interval=5):
         print_task = asyncio.create_task(self.print_status_every(interval))

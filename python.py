@@ -71,7 +71,8 @@ async def main():
             # add response of ai to messages, so it can be used as input for the next ai request
             handler.update_input_with_gpt_response()
             # add next prompt
-            handler.input.add_to_messages('user', prompts[f'prompt_{current_prompt}.txt'])
+            if prompts_left != 0:
+                handler.input.add_to_messages('user', prompts[f'prompt_{current_prompt}.txt'])
         current_prompt += 1
         [print_post_response_output_of_handler(handler) for handler in handlers]
 
@@ -87,6 +88,7 @@ async def main():
 
         all_messages = [message['content'] for message in handler.input.messages]
         merged_messages = ' '.join(all_messages)
+        handler.calculate_total_time()
         save_to_db(handler, merged_messages, correct)
 
 
