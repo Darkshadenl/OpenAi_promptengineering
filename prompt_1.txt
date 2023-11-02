@@ -3,13 +3,12 @@ Each line has a line number. If a comment spans multiple lines,
 then I want to know all the line numbers.
 I also want to know the complete comment.
 
-This:
+For example, this:
+32. /**
+33. This is the MoneyController class which handles API requests related to hours.
+34. */
 
-/**
-This is the MoneyController class which handles API requests related to hours.
-*/
 Would result in:
-
 |Line|Number Range|Comment
 |------------------|---------|
 |32-34| /**\n* This is the MoneyController class which handles API requests related to hours.\n*/\n  |

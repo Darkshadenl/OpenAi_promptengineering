@@ -15,7 +15,12 @@ class OpenAiModelHandler:
             ("start_time", "end_time")
         ]
         self.total_time = None
-        self.output_tokens = 0
+        self.request_input_tokens = 0
+        self.request_output_tokens = 0
+
+        # total input tokens of all requests combined in this handler
+        self.total_input_tokens = 0
+        self.total_output_tokens = 0
 
     async def create_prediction(self):
         start_time = datetime.now()
@@ -31,11 +36,26 @@ class OpenAiModelHandler:
         num_tokens = len(encoding.encode(string))
         return num_tokens
 
-    def update_output_tokens(self):
-        self.output_tokens += self.num_tokens_from_string(self.get_completion_message())
+    def update_total_output_tokens(self):
+        self.total_output_tokens += self.num_tokens_from_string(self.get_completion_message())
 
     def update_input_with_gpt_response(self):
         self.input.add_to_messages("assistant", self.get_completion_message())
+
+    def update_request_input_tokens(self):
+        tokens = 0
+        for message in self.input.messages:
+            tokens += self.num_tokens_from_string(message['content'])
+        self.request_input_tokens = tokens
+
+    def update_request_output_tokens(self):
+        self.request_output_tokens = self.num_tokens_from_string(self.get_completion_message())
+
+    def update_total_input_tokens(self):
+        tokens = 0
+        for message in self.input.messages:
+            tokens += self.num_tokens_from_string(message['content'])
+        self.total_input_tokens += tokens
 
     def get_completion_message(self) -> str:
         return self.completion.choices[0].message.content
@@ -55,9 +75,9 @@ class OpenAiModelHandler:
         print_task = asyncio.create_task(self.print_status_every(interval))
         await self.create_prediction()
         print_task.cancel()
-        print(f"\x1b[32m{self.input.model} finished in {self.calculate_total_time()}\x1b[0m\n")
+        print(f"\x1b[32m{self.input.model} finished in {self.calculate_total_time()}\x1b[0m")
 
     async def print_status_every(self, seconds):
         while True:
-            print(f"{self.input.model} is still running...")
+            print("\033[93m" + f"{self.input.model} is still running..." + "\033[0m")
             await asyncio.sleep(seconds)

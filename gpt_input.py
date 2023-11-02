@@ -76,19 +76,20 @@ class ChatGptInput:
         self.messages = []
         self.add_to_messages("system", self.system_prompt)
         self.add_to_messages("user", self.prompt)
-        self.total_tokens = 0
 
     # Role: assistant, user, system
     def add_to_messages(self, role: str, content: str):
         self.messages.append(
             {
-                "role": f"{role}",
+                "role": role,
                 "content": content
             }
         )
 
-    def add_tokens_to_total(self, number: int):
-        self.total_tokens += number
+    def get_system_prompt(self):
+        for message in self.messages:
+            if message['role'] == 'system':
+                return message['content']
 
     def to_dict(self):
         thedict = {
@@ -98,5 +99,5 @@ class ChatGptInput:
         thedict.update(
             {key: value
              for key, value in vars(self).items()
-             if value is not None and key not in ["system_prompt", "prompt", "total_tokens"]})
+             if value is not None and key not in ["system_prompt", "prompt"]})
         return thedict

@@ -1,9 +1,8 @@
 import sqlite3
-
 from openai_model_handler import OpenAiModelHandler
 
 
-def save_to_db(handler: OpenAiModelHandler, prompt, system_prompt, total_input_tokens, correct=False):
+def save_to_db(handler: OpenAiModelHandler, prompt, correct=False):
     handler_message = handler.completion.choices[0].message
     conn = sqlite3.connect('openai_model_handler.db')
     cursor = conn.cursor()
@@ -19,8 +18,8 @@ def save_to_db(handler: OpenAiModelHandler, prompt, system_prompt, total_input_t
         correct
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-    ''', (handler.input.model, prompt, system_prompt, handler_message.content, total_input_tokens,
-          handler.output_tokens, str(handler.total_time), correct))
+    ''', (handler.input.model, prompt, handler.input.get_system_prompt(), handler_message.content,
+          handler.total_input_tokens, handler.total_output_tokens, str(handler.total_time), correct))
     conn.commit()
     conn.close()
 
