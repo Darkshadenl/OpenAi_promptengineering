@@ -20,6 +20,14 @@ def get_text_file_string(filename) -> str:
         return bestand.read()
 
 
+def get_file_contents(*filenames):
+    files = {}
+    for filename in filenames:
+        with open(filename, 'r') as file:
+            files[filename] = file.read()
+    return files
+
+
 async def create_predictions_for_all(objects):
     # Start the prediction tasks
     prediction_tasks = asyncio.gather(*(obj.create_prediction_with_status(5) for obj in objects))
@@ -28,32 +36,33 @@ async def create_predictions_for_all(objects):
 
 
 async def main():
-    prompt = get_text_file_string('prompt_1.txt')
-    system_prompt = get_text_file_string('system_prompt.txt')
     code = get_text_file_string('code.txt')
-    prompt_w_code = prompt.replace('${code}', code)
-    prompt_tokens = num_tokens_from_string(prompt_w_code)
-    system_tokens = num_tokens_from_string(system_prompt)
-    total_input_tokens = prompt_tokens + system_tokens
-    print("\033[92m" + f"Number of input tokens for: {total_input_tokens}" + "\033[0m")
+    system_prompt = get_text_file_string('system_prompt.txt')
 
-    gpt_inputs = []
-    for model in models:
-        gpt_inputs.append(ChatGptInput(
-            prompt_w_code,
-            system_prompt,
-            model,
-        ))
+    prompts = get_file_contents('prompt_1.txt', 'prompt_2.txt')
 
     handlers = []
-    for gpt_input in gpt_inputs:
-        handlers.append(OpenAiModelHandler(gpt_input))
+    total_input_tokens = 0
+    for key, value in prompts.items():
+        prompt_w_code = value.replace('${code}', code)
+        prompt_tokens = num_tokens_from_string(prompt_w_code) if total_input_tokens <= 0 else total_input_tokens
+
+        for model in models:
+            gpt_input = ChatGptInput(prompt_w_code, system_prompt, model)
+            open_ai_model_handler = OpenAiModelHandler(gpt_input)
+            handlers.append(open_ai_model_handler)
+
+    total_input_tokens += num_tokens_from_string(system_prompt)
+    print("\033[92m" + f"Number of input tokens: {total_input_tokens}" + "\033[0m")
 
     global_start_time = datetime.now()
-    print("\x1b[31mStarting predictions...\x1b[0m")
+    print(f"\x1b[31mStarting predictions at {global_start_time}...\x1b[0m")
+
     await create_predictions_for_all(handlers)
-    print("\x1b[32mFinished predictions!\x1b[0m")
+
+
     global_end_time = datetime.now()
+    print(f"\x1b[32mFinished predictions at {global_end_time}!\x1b[0m")
     global_total_time = global_end_time - global_start_time
     print(f"Total time: {global_total_time}\n")
 
@@ -71,7 +80,7 @@ async def main():
         if user_correct == 'y':
             correct = True
 
-        save_to_db(handler, prompt_w_code, system_prompt, total_input_tokens, correct)
+        # save_to_db(handler, prompt_w_code, system_prompt, total_input_tokens, correct)
 
 
 
