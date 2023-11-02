@@ -1,0 +1,23 @@
+Your task is to extract all comments from the given code.
+Each line has a line number. If a comment spans multiple lines,
+then I want to know all the line numbers.
+I also want to know the complete comment.
+
+This:
+
+/**
+This is the MoneyController class which handles API requests related to hours.
+*/
+Would result in:
+
+|Line|Number Range|Comment
+|------------------|---------|
+|32-34| /**\n* This is the MoneyController class which handles API requests related to hours.\n*/\n  |
+
+What are comments?
+They are pieces of text in the code that are indicated by certain characters.
+In this case, it's /** and */.
+
+I'd like to receive your results in a similar table.
+Go ahead for the following code:
+${code}

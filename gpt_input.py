@@ -1,3 +1,5 @@
+import tiktoken
+
 
 class ChatGptInput:
     # https://platform.openai.com/docs/api-reference/chat/create
@@ -71,19 +73,27 @@ class ChatGptInput:
         # List of available functions.
         self.functions = functions
 
+        self.messages = []
+        self.add_to_messages("system", self.system_prompt)
+        self.add_to_messages("user", self.prompt)
+        self.total_tokens = 0
+
+    # Role: assistant, user, system
+    def add_to_messages(self, role: str, content: str):
+        self.messages.append(
+            {
+                "role": f"{role}",
+                "content": content
+            }
+        )
+
+    def add_tokens_to_total(self, number: int):
+        self.total_tokens += number
+
     def to_dict(self):
         thedict = {
             "model": self.model,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": self.system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": self.prompt
-                }
-            ]
+            "messages": self.messages
         }
         thedict.update(
             {key: value

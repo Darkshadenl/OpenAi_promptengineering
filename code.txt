@@ -1,3 +1,33 @@
+import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { DateTime } from 'luxon';
+import { Authenticated } from '~/auth/authenticated.decorator';
+import { Hour, HourService } from '~/domain';
+import { CreateInvoiceDto, CreateInvoiceLineDto, InvoiceDto, SimplicateAdapter } from '~/infrastructure/simplicate';
+
+interface CrossInvoiceServiceHours {
+  name: string;
+  totalAmount: number;
+  totalDuration: number;
+  hours: Hour[];
+}
+
+interface CrossInvoiceProjectHours {
+  name: string;
+  totalAmount: number;
+  totalDuration: number;
+  services: CrossInvoiceServiceHours[];
+}
+
+interface CrossInvoiceHours {
+  vendorId: string;
+  vendorName: string;
+  supplierId: string;
+  supplierName: string;
+  supplierMyOrganizationProfileId: string;
+  totalAmount: number;
+  totalDuration: number;
+  projects: CrossInvoiceProjectHours[];
+}
 
 /**
  * This is the MoneyController class which handles API requests related to hours.
@@ -145,7 +175,7 @@ export class HourController {
         project.totalDuration += durationHours;
         service.totalAmount += durationHours * rate;
         service.totalDuration += durationHours;
-        service.hours.push(hour);
+        service.hours.push(hour); // test
 
         return accu;
       }, []);

@@ -1,0 +1,8 @@
+Now that we have the comments,
+I want you to check if the comment still matches the code it is associated with.
+In this case, the comment is the guiding factor. If the comment no longer matches, please update it.
+Provide me with the same table as before, but add a column indicating the reason why you changed the comment.
+
+This would look like this:
+|Line Number Range|Updated Comment|Change Reason|
+|-----------------|---------------|-------------|

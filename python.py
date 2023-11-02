@@ -6,7 +6,7 @@ from openai_model_handler import OpenAiModelHandler, ChatGptInput
 import asyncio
 
 load_dotenv()
-models = ["gpt-3.5-turbo", "gpt-4"]
+models = ["gpt-4"]
 
 
 def num_tokens_from_string(string: str) -> int:
@@ -28,7 +28,7 @@ async def create_predictions_for_all(objects):
 
 
 async def main():
-    prompt = get_text_file_string('prompt.txt')
+    prompt = get_text_file_string('prompt_1.txt')
     system_prompt = get_text_file_string('system_prompt.txt')
     code = get_text_file_string('code.txt')
     prompt_w_code = prompt.replace('${code}', code)
@@ -60,16 +60,17 @@ async def main():
     for handler in handlers:
         handler_message = handler.completion.choices[0].message
         handler.output_tokens = num_tokens_from_string(handler_message.content)
+
         print(f"Number of output tokens for {handler.input.model}: {handler.output_tokens}")
         print(f"\x1b[32m{handler.input.model}\x1b[0m took \x1b[34m{handler.total_time}\x1b[0m seconds. Results:\n")
         print(handler_message.content + "\n")
 
-    for handler in handlers:
         user_correct = input(f"\x1b[31mWas {handler.input.model}'s output Correct? y/n\x1b[0m")
         correct = False
 
         if user_correct == 'y':
             correct = True
+
         save_to_db(handler, prompt_w_code, system_prompt, total_input_tokens, correct)
 
 
