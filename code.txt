@@ -1,4 +1,3 @@
-
 /**
  * This is the MoneyController class which handles API requests related to hours.
  */

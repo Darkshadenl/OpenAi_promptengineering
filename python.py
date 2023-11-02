@@ -31,8 +31,20 @@ def update_handlers_metrics(handlers):
         handler.update_request_output_tokens()
 
 
+def add_line_numbers(filename):
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+    numbered_lines = []
+    for idx, line in enumerate(lines, start=1):
+        numbered_line = f'{idx}. {line}'
+        numbered_lines.append(numbered_line)
+
+    return ''.join(numbered_lines)
+
+
 async def main():
-    code = get_text_file_string('code.txt')
+    code = add_line_numbers('code.txt')
     system_prompt = get_text_file_string('system_prompt.txt')
     prompts = get_file_contents('prompt_1.txt', 'prompt_2.txt')
     prompts_left = len(prompts)
@@ -48,19 +60,20 @@ async def main():
 
     time_tracker.start()
 
+    current_prompt = 2
     # keep running until all prompts are done
     while prompts_left > 0:
         [print_pre_response_output_of_handler(handler) for handler in handlers]
-        await asyncio.gather(*(handler.create_prediction_with_status(5) for handler in handlers))
+        await asyncio.gather(*(handler.create_prediction_with_status(2) for handler in handlers))
         update_handlers_metrics(handlers)
+        prompts_left -= 1
         for handler in handlers:
             # add response of ai to messages, so it can be used as input for the next ai request
             handler.update_input_with_gpt_response()
             # add next prompt
-            handler.input.add_to_messages(prompts[f'prompt_{prompts_left - 1}.txt'])
-
+            handler.input.add_to_messages('user', prompts[f'prompt_{current_prompt}.txt'])
+        current_prompt += 1
         [print_post_response_output_of_handler(handler) for handler in handlers]
-        prompts_left -= 1
 
     time_tracker.stop()
     print(f"Total time: {time_tracker.total_time}\n")
