@@ -1,22 +1,87 @@
-Your task is to extract all comments from the given code.
-Each line has a line number. If a comment spans multiple lines,
-then I want to know all the line numbers.
-I also want to know the complete comment.
+In step 1 perform an analysis of the TypeScript code provided, focusing exclusively on the code's syntax and identifiers to
+determine the high-level subject or theme. Extract and list the names of classes, interfaces, modules/namespaces,
+dependencies, and main data types used—all based solely on the code, not on comments. Summarize this information and
+present it above a Markdown table, which will then catalog the comments with columns for 'Index', 'Comment Range', and
+'Context Range'. The table should include the line numbers for each comment's start and end, as well as the context range,
+ without relying on the comments themselves for any information.
 
-For example, this:
-32. /**
-33. This is the MoneyController class which handles API requests related to hours.
-34. */
+After doing this review the TypeScript code and the comments as indexed in step one.
+Using the examples of faulty comments provided, which include TODOs indicating how the comments should be improved,
+revise each comment to make the necessary corrections.
+Preserve the original formatting of the comments and encapsulate each improved comment with <RETURNABLE> tags.
+Ensure that each improvement incorporates the correct terminology and information based on the high-level analysis of the
+code and avoids the issues illustrated by the TODO examples.
 
-Would result in:
-|Line|Number Range|Comment
-|------------------|---------|
-|32-34| /**\n* This is the MoneyController class which handles API requests related to hours.\n*/\n  |
 
-What are comments?
-They are pieces of text in the code that are indicated by certain characters.
-In this case, it's /** and */.
+The todo examples:
+```typescript
+/**
+ * Handles wildlife-related activities. TODO: should be: Handles fox-related activities.
+ *
+ * The FoxesController is a module that is responsible for managing all animal requests. TODO: should be: handling all foxes-related requests.
+ * It uses the EventBus and the QueryBus to interact with other parts of the system. TODO: should be: CommandBus and the QueryBus to interact with other parts of the application.
+ * The FoxesController is designed for usage with authenticated users and some methods are public. TODO: should be: some methods require administrator access.
+ *
+ * The following HTTP methods are supported:
+ * - GET /foxes: Retrieve all animals. TODO: should be: Retrieve all foxes.
+ * - GET /foxes/{id}: Retrieve a fox by its name. TODO: should be: Retrieve a fox by its ID.
+ * - POST /foxes: Create a new fox. Any user can use this method. TODO: should be: Requires admin access.
+ * - POST /foxes/{id}/name/{name}: Set the name of an animal. TODO: should be: Set the name of a fox.
+ * - POST /foxes/{id}/spot: Spot a fox at a specific location.
+ * - DELETE /foxes/{id}/spot/{dateTime}: Remove an animal's spotting at a specific time. TODO: should be: a fox's spotting at a specific time.
+ * - PUT /foxes/{id}/hunt/{dateTime}: Update a fox's hunt at a specific time.
+ * - PUT /foxes/{id}/spot/{dateTime}: Update an animal's spot at a specific time. TODO: should be: a fox's spot at a specific time.
+ * - POST /foxes/{id}/hunt: Register a hunting activity for an animal. TODO: should be: Register a fox's hunt.
+ * - DELETE /foxes/{id}/hunt/{dateTime}: Remove a fox's hunt at a specific time.
+ * - POST /foxes/{id}/visit: Register a visit to an animal. TODO: should be: to a fox.
+ * - DELETE /foxes/{id}/visit/{dateTime}: Remove a visit to an animal at a specific time. TODO: should be: to a fox at a specific time.
+ * - POST /foxes/{id}/status/{color}: Set an animal's status based on color. TODO: should be: Set a fox's status based on color.
+ * - POST /foxes/{id}/picture: Upload a picture of an animal. TODO: should be: Set a fox's picture.
+ * - POST /foxes/{id}/traccar: Register an animal's Traccar ID and optionally upload positions. This operation is open to all users. TODO: should be: Register a fox's Traccar ID and optionally upload positions. This operation requires admin access.
+ *
+ * Each request is logged for auditing and debugging purposes.
+ *
+ * @param {EventBus} eventBus - The application's event bus. TODO: should be: CommandBus
+ * @param {QueryBus} queryBus - The application's query bus.
+ */
 
-I'd like to receive your results in a similar table.
-Go ahead for the following code:
+/**
+ * AdminController is responsible for handling event-related TODO should be: admin-related
+ * requests. It accesses the system services and data stores to perform actions
+ * such as restarting the system, managing events, etc. This controller is
+ * specifically designed for use by administrators and requires appropriate
+ * authorization for access which is currently not activated TODO remove: which is currently not activated.
+ *
+ * The following HTTP methods are supported:
+ * - POST /admin/restart: Restart the system.
+ * - GET /admin/events: Retrieve an event. TODO should be: Retrieve all events
+ * - GET /admin/env: Get the current environment variables.
+ * - POST /admin/events: Add a new event.
+ * - DELETE /admin/events/eventType/:eventType: Delete an event type.
+ * - DELETE /admin/events/:aggregateType/:aggregateId/:eventId: Delete an event.
+ * - DELETE /admin/aggregate/:type/:id: Delete an aggregate if date is bigger than today TODO remove: if date is bigger than today.
+ * - DELETE /admin/positions/:traccarid: Delete positions for a specific device.
+ *
+ * Note that every request requires an authenticated user and some methods require a specific
+ * user role (e.g. administrator).
+ *
+ * Each request is logged for auditing and debugging purposes.
+ *
+ * @param {RestartService} restartService - Service for restarting functionality
+ * @param {EventStore} eventStore - Store for event data and operations
+ * @param {TraccarAdapter} traccar - Adapter for Traccar device operations
+ */
+```
+
+If a comment is the same as the original comment, don't include it in the end result.
+Don't include any additional text in the end result. It should always have this format (replace <<COMMENT>> with the comment):
+<RETURNABLE><<COMMENT>></RETURNABLE>
+<RETURNABLE><<COMMENT>></RETURNABLE>
+<LIST OF REASONS WHY YOU INCLUDED THE COMMENTS IN THE ENDRESULT>
+
+So now that you know what to look out for in the code provided in the original prompt using these examples,
+provide me with the improved comments:
+
+
+The code:
 ${code}

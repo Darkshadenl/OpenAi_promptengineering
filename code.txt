@@ -1,8 +1,90 @@
-/**
- * This is the MoneyController class which handles API requests related to hours.
- */
-@Authenticated()
-@Controller('api/hours')
-export class HourController {
-  constructor(private readonly service: HourService, private readonly simplicate: SimplicateAdapter) {}
+import { Controller, Get, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { formatRFC3339 } from 'date-fns';
+import { RequireActiveUser } from '~/authorization';
+import { JotihuntConfig, TraccarConfig, WhatsappConfig } from '~/configuration';
 
+/**
+ * InfoController is a controller class responsible for handling requests
+ * related to the geographical information of the system including location details,
+ * coordinates, and Maps configuration. It requires an active admin to perform any requests.
+ *
+ * The following HTTP methods are supported:
+ * - GET /info/version: Get the system version and license information.
+ * - GET /info: Get the system configuration including the start and end times,
+ *              max user limit, and Traccar URL.
+ * - GET /info/whatsapp: Get the Email configuration.
+ *
+ * Each method logs an info message for debugging and auditing purposes.
+ *
+ * Note that every request requires an authenticated and active admin.
+ *
+ * @param {ConfigService} configService - Service for geographical
+ * configuration related operations
+ */
+@Controller('info')
+@RequireActiveUser()
+export class InfoController {
+  private logger = new Logger(InfoController.name);
+
+  constructor(private readonly configService: ConfigService) {}
+
+  @Get('version')
+  version() {
+    this.logger.debug('version');
+    const version = {
+      version: process.env.GIT_TAG || process.env.GIT_REF_SLUG,
+      timestamp: process.env.GIT_TIMESTAMP || formatRFC3339(new Date()),
+      sha: process.env.GIT_SHA,
+    };
+    return version;
+  }
+
+  @Get()
+  info() {
+    // Fetches configuration details and logs them
+    this.logger.debug(`info`);
+
+    const { start, end, hintLength } =
+      this.configService.get<JotihuntConfig>('jotihunt')!;
+
+    const { url } = this.configService.get<TraccarConfig>('traccar')!;
+    const info = {
+      start,
+      end,
+      hintLength,
+      traccar: {
+        url,
+      },
+    };
+
+    this.logger.verbose(`info: ${JSON.stringify(info)}`);
+
+    return info;
+  }
+
+  /**
+   * @decorator Get('whatsapp')
+   * This endpoint handles HTTP GET requests for the 'whatsapp' path.
+   *
+   * This method retrieves the current configuration for the Whatsapp service
+   * from the configuration service and returns it. The config object contains all
+   * the necessary information for connecting and interacting with the Whatsapp service.
+   *
+   * Note that this method should only be used if the application needs to pull the
+   * configuration information at runtime. The actual interaction with Whatsapp service
+   * should be handled by a separate component or service.
+   *
+   * Log level is set to debug for this operation for monitoring and troubleshooting purposes.
+   *
+   * @method whatsapp
+   * @returns {WhatsappConfig}
+   *           - Whatsapp Configuration object as defined in the application's configuration.
+   */
+  @Get('whatsapp')
+  whatsapp() {
+    this.logger.debug(`whatsapp`);
+
+    return this.configService.get<WhatsappConfig>('whatsapp')!;
+  }
+}

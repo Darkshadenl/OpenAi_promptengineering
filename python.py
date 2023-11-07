@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 
+from add_line_numbers import add_line_numbers
 from console import print_pre_response_output_of_handler, print_post_response_output_of_handler
 from database import setup_db, save_to_db
 from openai_model_handler import OpenAiModelHandler, ChatGptInput
@@ -7,7 +8,7 @@ from time_tracker import Timetracker
 import asyncio
 
 load_dotenv()
-models = ["gpt-3.5-turbo"]
+models = ["gpt-4"]
 time_tracker = Timetracker()
 
 
@@ -31,25 +32,14 @@ def update_handlers_metrics(handlers):
         handler.update_request_output_tokens()
 
 
-def add_line_numbers(filename):
-    with open(filename, 'r') as file:
-        lines = file.readlines()
-
-    numbered_lines = []
-    for idx, line in enumerate(lines, start=1):
-        numbered_line = f'{idx}. {line}'
-        numbered_lines.append(numbered_line)
-
-    return ''.join(numbered_lines)
-
-
 async def main():
     code = add_line_numbers('code.txt')
     system_prompt = get_text_file_string('system_prompt.txt')
-    prompts = get_file_contents('prompt_1.txt', 'prompt_2.txt')
+    prompts = get_file_contents('prompt_1.txt')
     prompts_left = len(prompts)
     handlers = []
 
+    # first round so always prompt_1
     for model in models:
         prompt_w_code = prompts['prompt_1.txt'].replace('${code}', code)
         gpt_input = ChatGptInput(prompt_w_code, system_prompt, model)

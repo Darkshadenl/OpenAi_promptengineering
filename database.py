@@ -37,7 +37,8 @@ def setup_db():
         total_input_tokens INTEGER,
         total_output_tokens INTEGER,
         total_time TEXT,
-        correct BOOLEAN
+        correct BOOLEAN,
+        request_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     ''')
     conn.commit()
