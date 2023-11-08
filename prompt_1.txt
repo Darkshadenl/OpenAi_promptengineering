@@ -1,87 +1,51 @@
-In step 1 perform an analysis of the TypeScript code provided, focusing exclusively on the code's syntax and identifiers to
-determine the high-level subject or theme. Extract and list the names of classes, interfaces, modules/namespaces,
-dependencies, and main data types used—all based solely on the code, not on comments. Summarize this information and
-present it above a Markdown table, which will then catalog the comments with columns for 'Index', 'Comment Range', and
-'Context Range'. The table should include the line numbers for each comment's start and end, as well as the context range,
- without relying on the comments themselves for any information.
+You're an expert in Typescript comments. You know when a comment is vague, good, or bad.
+You know when it's wrong, or should be improved.
+You, so to say, know the rules of the game.
+You are going to improve the comments in the code that I provide.
+It is of utmost importance that the comments is in line with what the code does.
+This is priority number one, and should be handled with the most care.
+It's as important as not snipping the wrong wire during a bomb defusion.
+When returning a result preserve the original formatting of the comments and encapsulate each improved comment with <RETURNABLE> tags.
+Here's additional rules to better be able to determine if a comment is wrong:
+The comment should precisely describe what the code is doing or why certain decisions were made, without being overly broad or generic.
+If a comment is meant to explain a complex algorithm or workflow, it should break down the explanation into specific steps or stages.
+Comments must pertain directly to the code they are annotating. Irrelevant comments can mislead or confuse a developer, leading to misunderstanding or misuse of the code.
+Comments should not state the obvious or reiterate what can be clearly inferred from the code itself, as this does not add value and clutters the codebase.
+Comments should provide information that can be acted upon, rather than aspirational or vague goals. For example, a TODO comment should specify a clear action item, not an unreachable or ill-defined objective.
+Comments should address why non-obvious code decisions were made, explaining the rationale behind a chosen approach, especially if multiple alternatives exist.
+A comment should give context to complex business logic or domain-specific considerations, providing clarity to developers unfamiliar with the domain.
+Inline comments must target specific blocks of code or statements to which they apply, avoiding confusion about their scope.
+Each comment should relate to the latest version of the codebase; obsolete comments must be updated or removed to prevent discrepancies.
+Comments should anticipate the developer's questions or potential confusion, offering insights that the code cannot convey on its own.
+Comments should clarify the intended use and edge cases of functions, classes, and modules, particularly when their behavior is not immediately clear from their signatures or names.
+When referring to code refactoring or optimization, comments should provide actionable items that can be addressed in the current scope of work or project roadmap.
+Comments should avoid redundancy by not simply repeating what is already evident in the code, but rather providing additional insight or explanation.
+If a block of code has been commented out, there should be an accompanying comment explaining why it is being retained in the codebase, such as potential reuse in the future or historical significance.
+Comments should use clear and concise language, avoiding overly technical jargon when possible to make the codebase accessible to developers with various levels of expertise.
+When a comment is necessary to explain a complex line or block of code, it should be as close as possible to the code it references to minimize the effort needed to correlate the comment with the code.
+Documentation comments for functions, classes, and interfaces should follow TypeScript's JSDoc conventions to ensure that automated documentation tools can correctly generate the project's documentation.
+The consistency of terminology within comments should be checked. Terms, variable names, and function names within comments should match those in the code.
+Consistent voice and tense should be maintained in all comments throughout the codebase.
+Ensure comments are contextually relevant to the code they accompany. This could involve checking for code keywords and ensuring they are also present in the comment.
+Detect possible outdated comments by checking for discrepancies between the comment content and the code logic or structure.
+Comments that contain temporal language (e.g., "temporary fix", "as of version 2.0") should be flagged for review to ascertain if they are still applicable.
+For JSDoc comments, the program should verify that all documentation tags (e.g., @param, @return) are used correctly and correspond to actual parameters or return types of functions.
+Identify comments that explain "what" the code is doing if the "what" is already clearly expressed by the code itself. Such comments should be flagged as potential candidates for removal to reduce noise.
+Comments that are vague or non-informative (e.g., "performs the operation") should be flagged for further improvement to clarify their intent or to be made more specific.
 
-After doing this review the TypeScript code and the comments as indexed in step one.
-Using the examples of faulty comments provided, which include TODOs indicating how the comments should be improved,
-revise each comment to make the necessary corrections.
-Preserve the original formatting of the comments and encapsulate each improved comment with <RETURNABLE> tags.
-Ensure that each improvement incorporates the correct terminology and information based on the high-level analysis of the
-code and avoids the issues illustrated by the TODO examples.
-
-
-The todo examples:
-```typescript
-/**
- * Handles wildlife-related activities. TODO: should be: Handles fox-related activities.
- *
- * The FoxesController is a module that is responsible for managing all animal requests. TODO: should be: handling all foxes-related requests.
- * It uses the EventBus and the QueryBus to interact with other parts of the system. TODO: should be: CommandBus and the QueryBus to interact with other parts of the application.
- * The FoxesController is designed for usage with authenticated users and some methods are public. TODO: should be: some methods require administrator access.
- *
- * The following HTTP methods are supported:
- * - GET /foxes: Retrieve all animals. TODO: should be: Retrieve all foxes.
- * - GET /foxes/{id}: Retrieve a fox by its name. TODO: should be: Retrieve a fox by its ID.
- * - POST /foxes: Create a new fox. Any user can use this method. TODO: should be: Requires admin access.
- * - POST /foxes/{id}/name/{name}: Set the name of an animal. TODO: should be: Set the name of a fox.
- * - POST /foxes/{id}/spot: Spot a fox at a specific location.
- * - DELETE /foxes/{id}/spot/{dateTime}: Remove an animal's spotting at a specific time. TODO: should be: a fox's spotting at a specific time.
- * - PUT /foxes/{id}/hunt/{dateTime}: Update a fox's hunt at a specific time.
- * - PUT /foxes/{id}/spot/{dateTime}: Update an animal's spot at a specific time. TODO: should be: a fox's spot at a specific time.
- * - POST /foxes/{id}/hunt: Register a hunting activity for an animal. TODO: should be: Register a fox's hunt.
- * - DELETE /foxes/{id}/hunt/{dateTime}: Remove a fox's hunt at a specific time.
- * - POST /foxes/{id}/visit: Register a visit to an animal. TODO: should be: to a fox.
- * - DELETE /foxes/{id}/visit/{dateTime}: Remove a visit to an animal at a specific time. TODO: should be: to a fox at a specific time.
- * - POST /foxes/{id}/status/{color}: Set an animal's status based on color. TODO: should be: Set a fox's status based on color.
- * - POST /foxes/{id}/picture: Upload a picture of an animal. TODO: should be: Set a fox's picture.
- * - POST /foxes/{id}/traccar: Register an animal's Traccar ID and optionally upload positions. This operation is open to all users. TODO: should be: Register a fox's Traccar ID and optionally upload positions. This operation requires admin access.
- *
- * Each request is logged for auditing and debugging purposes.
- *
- * @param {EventBus} eventBus - The application's event bus. TODO: should be: CommandBus
- * @param {QueryBus} queryBus - The application's query bus.
- */
-
-/**
- * AdminController is responsible for handling event-related TODO should be: admin-related
- * requests. It accesses the system services and data stores to perform actions
- * such as restarting the system, managing events, etc. This controller is
- * specifically designed for use by administrators and requires appropriate
- * authorization for access which is currently not activated TODO remove: which is currently not activated.
- *
- * The following HTTP methods are supported:
- * - POST /admin/restart: Restart the system.
- * - GET /admin/events: Retrieve an event. TODO should be: Retrieve all events
- * - GET /admin/env: Get the current environment variables.
- * - POST /admin/events: Add a new event.
- * - DELETE /admin/events/eventType/:eventType: Delete an event type.
- * - DELETE /admin/events/:aggregateType/:aggregateId/:eventId: Delete an event.
- * - DELETE /admin/aggregate/:type/:id: Delete an aggregate if date is bigger than today TODO remove: if date is bigger than today.
- * - DELETE /admin/positions/:traccarid: Delete positions for a specific device.
- *
- * Note that every request requires an authenticated user and some methods require a specific
- * user role (e.g. administrator).
- *
- * Each request is logged for auditing and debugging purposes.
- *
- * @param {RestartService} restartService - Service for restarting functionality
- * @param {EventStore} eventStore - Store for event data and operations
- * @param {TraccarAdapter} traccar - Adapter for Traccar device operations
- */
-```
 
 If a comment is the same as the original comment, don't include it in the end result.
 Don't include any additional text in the end result. It should always have this format (replace <<COMMENT>> with the comment):
 <RETURNABLE><<COMMENT>></RETURNABLE>
+<LIST OF REASONS WHY YOU INCLUDED THE COMMENTS IN THE ENDRESULT>
+-------------------
 <RETURNABLE><<COMMENT>></RETURNABLE>
 <LIST OF REASONS WHY YOU INCLUDED THE COMMENTS IN THE ENDRESULT>
+-------------------
+
 
 So now that you know what to look out for in the code provided in the original prompt using these examples,
 provide me with the improved comments:
-
 
 The code:
 ${code}

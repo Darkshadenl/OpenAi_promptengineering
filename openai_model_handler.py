@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime
-
 import tiktoken
 from openai import AsyncOpenAI
 from gpt_input import ChatGptInput

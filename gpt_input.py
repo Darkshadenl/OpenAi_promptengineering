@@ -1,6 +1,3 @@
-import tiktoken
-
-
 class ChatGptInput:
     # https://platform.openai.com/docs/api-reference/chat/create
     def __init__(
@@ -15,7 +12,7 @@ class ChatGptInput:
             presence_penalty=None,
             stop=None,
             stream=False,
-            temperature=None,
+            temperature=0.2,
             top_p=None,
             user=None,
             function_call=None,

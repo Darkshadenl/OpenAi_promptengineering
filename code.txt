@@ -1,90 +1,148 @@
-import { Controller, Get, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { formatRFC3339 } from 'date-fns';
-import { RequireActiveUser } from '~/authorization';
-import { JotihuntConfig, TraccarConfig, WhatsappConfig } from '~/configuration';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Req,
+} from '@nestjs/common';
+import { RequireAdmin, Root } from '~/authorization';
+import { AuthenticatedRequest } from '~/authorization/authenticated.request';
+import { EventStore } from '~/infrastructure/event-store';
+import { Event } from '~/infrastructure/event-store/event.entity';
+import { RestartService } from './restart.service';
+import { TraccarAdapter } from '~/infrastructure/traccar';
+
+function stripsecrets(key: string, value: string | undefined) {
+  if (!value) {
+    return value;
+  }
+  const secrets = ['password', 'secret', 'token', 'key'];
+  if (secrets.find((secret) => key.toLowerCase().includes(secret))) {
+    return value[0] + '***' + value[value.length - 1];
+  }
+  return value;
+}
 
 /**
- * InfoController is a controller class responsible for handling requests
- * related to the geographical information of the system including location details,
- * coordinates, and Maps configuration. It requires an active admin to perform any requests.
+ * AdminController is responsible for handling event-related
+ * requests. It accesses the system services and data stores to perform actions
+ * such as restarting the system, managing events, etc. This controller is
+ * specifically designed for use by administrators and requires appropriate
+ * authorization for access which is currently not activated
  *
  * The following HTTP methods are supported:
- * - GET /info/version: Get the system version and license information.
- * - GET /info: Get the system configuration including the start and end times,
- *              max user limit, and Traccar URL.
- * - GET /info/whatsapp: Get the Email configuration.
+ * - POST /admin/restart: Restart the system.
+ * - GET /admin/events: Retrieve an event.
+ * - GET /admin/env: Get the current environment variables.
+ * - POST /admin/events: Add a new event.
+ * - DELETE /admin/events/eventType/:eventType: Delete an event type.
+ * - DELETE /admin/events/:aggregateType/:aggregateId/:eventId: Delete an event.
+ * - DELETE /admin/aggregate/:type/:id: Delete an aggregate if date is bigger than today
+ * - DELETE /admin/positions/:traccarid: Delete positions for a specific device.
  *
- * Each method logs an info message for debugging and auditing purposes.
+ * Note that every request requires an authenticated user and some methods require a specific
+ * user role (e.g. administrator).
  *
- * Note that every request requires an authenticated and active admin.
+ * Each request is logged for auditing and debugging purposes.
  *
- * @param {ConfigService} configService - Service for geographical
- * configuration related operations
+ * @param {RestartService} restartService - Service for restarting functionality
+ * @param {EventStore} eventStore - Store for event data and operations
+ * @param {TraccarAdapter} traccar - Adapter for Traccar device operations
  */
-@Controller('info')
-@RequireActiveUser()
-export class InfoController {
-  private logger = new Logger(InfoController.name);
+@Controller('admin')
+@RequireAdmin()
+export class AdminController {
+  private logger = new Logger(AdminController.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly restartService: RestartService,
+    private readonly eventStore: EventStore,
+    private readonly traccar: TraccarAdapter,
+  ) {}
 
-  @Get('version')
-  version() {
-    this.logger.debug('version');
-    const version = {
-      version: process.env.GIT_TAG || process.env.GIT_REF_SLUG,
-      timestamp: process.env.GIT_TIMESTAMP || formatRFC3339(new Date()),
-      sha: process.env.GIT_SHA,
-    };
-    return version;
+  // Logs the email of the user who requested a restart and executes the service restart method
+  @Post('restart')
+  restart(@Req() req: AuthenticatedRequest) {
+    this.logger.warn(`Restart request by ${req.user?.email}`);
+    this.restartService.restart();
+    return {};
   }
 
-  @Get()
-  info() {
-    // Fetches configuration details and logs them
-    this.logger.debug(`info`);
-
-    const { start, end, hintLength } =
-      this.configService.get<JotihuntConfig>('jotihunt')!;
-
-    const { url } = this.configService.get<TraccarConfig>('traccar')!;
-    const info = {
-      start,
-      end,
-      hintLength,
-      traccar: {
-        url,
-      },
-    };
-
-    this.logger.verbose(`info: ${JSON.stringify(info)}`);
-
-    return info;
+  @Get('events')
+  getEvents(@Req() req: AuthenticatedRequest) {
+    this.logger.log(`GetEvents ${req.user?.email}`);
+    return this.eventStore.findAll();
   }
 
-  /**
-   * @decorator Get('whatsapp')
-   * This endpoint handles HTTP GET requests for the 'whatsapp' path.
-   *
-   * This method retrieves the current configuration for the Whatsapp service
-   * from the configuration service and returns it. The config object contains all
-   * the necessary information for connecting and interacting with the Whatsapp service.
-   *
-   * Note that this method should only be used if the application needs to pull the
-   * configuration information at runtime. The actual interaction with Whatsapp service
-   * should be handled by a separate component or service.
-   *
-   * Log level is set to debug for this operation for monitoring and troubleshooting purposes.
-   *
-   * @method whatsapp
-   * @returns {WhatsappConfig}
-   *           - Whatsapp Configuration object as defined in the application's configuration.
-   */
-  @Get('whatsapp')
-  whatsapp() {
-    this.logger.debug(`whatsapp`);
+  // Returns an object containing environment variables with sensitive data stripped
+  @Get('env')
+  getEnv() {
+    this.logger.debug(`env`);
 
-    return this.configService.get<WhatsappConfig>('whatsapp')!;
+    const env = process.env;
+    return Object.entries(env).reduce<Record<string, string | undefined>>(
+      (accu, [key, value]) => ({ ...accu, [key]: stripsecrets(key, value) }),
+      {},
+    );
+  }
+
+  // Handles POST request to 'events', logs the requester, persists the event and returns the created event.
+  @Post('events')
+  postEvent(@Body() event: Event, @Req() req: AuthenticatedRequest) {
+    this.logger.warn(`Event posted by ${req.user?.email}`);
+    this.eventStore.persist(event);
+    return this.eventStore.findOne(event.eventId);
+  }
+
+  @Delete('events/eventType/:eventType')
+  @Root()
+  deleteEventType(
+    @Param('eventType') eventType: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    this.logger.warn(`Event type ${eventType} deleted by ${req.user?.email}`);
+
+    return this.eventStore.deleteEventType(eventType);
+  }
+
+  @Delete('events/:aggregateType/:aggregateId/:eventId')
+  @Root()
+  async deleteEvent(
+    @Param('aggregateType') aggregateType: string,
+    @Param('aggregateId') aggregateId: number,
+    @Param('eventId') eventId: number,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    this.logger.warn(
+      `Event ${aggregateType}/${aggregateId}/${eventId} deleted by ${req.user?.email}`,
+    );
+    return this.eventStore.deleteEvent(aggregateType, aggregateId, eventId);
+  }
+
+  // Deletes an aggregate based on 'type' and 'id' parameters and log the warning
+  @Delete('aggregate/:type/:id')
+  @Root()
+  deleteAggregate(
+    @Param('type') type: string,
+    @Param('id') id: number,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    this.logger.warn(`Aggregate ${type}:${id} deleted by ${req.user?.email}`);
+    return this.eventStore.deleteAggregate(type, id);
+  }
+
+  @Delete('positions/:traccarid')
+  @Root()
+  deletePositions(
+    @Param('traccarid') traccarid: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    this.logger.warn(
+      `Positions deleted for device ${traccarid} deleted by ${req.user?.email}`,
+    );
+    return this.traccar.deleteAllPositionsForDevice(traccarid);
   }
 }
