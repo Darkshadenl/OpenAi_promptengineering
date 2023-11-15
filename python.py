@@ -8,7 +8,7 @@ from time_tracker import Timetracker
 import asyncio
 
 load_dotenv()
-models = ["gpt-4"]
+models = ["gpt-4-1106-preview"]
 time_tracker = Timetracker()
 
 
@@ -34,6 +34,8 @@ def update_handlers_metrics(handlers):
 
 async def main():
     code = add_line_numbers('code.txt')
+    code2 = add_line_numbers('code2.txt')
+    codes = [code, code2]
     system_prompt = get_text_file_string('system_prompt.txt')
     prompts = get_file_contents('prompt_1.txt')
     prompts_left = len(prompts)
@@ -41,12 +43,13 @@ async def main():
 
     # first round so always prompt_1
     for model in models:
-        prompt_w_code = prompts['prompt_1.txt'].replace('${code}', code)
-        gpt_input = ChatGptInput(prompt_w_code, system_prompt, model)
-        handler = OpenAiModelHandler(gpt_input)
-        handler.update_request_input_tokens()
-        handler.update_total_input_tokens()
-        handlers.append(handler)
+        for c in codes:
+            prompt_w_code = prompts['prompt_1.txt'].replace('${code}', c)
+            gpt_input = ChatGptInput(prompt_w_code, system_prompt, model)
+            handler = OpenAiModelHandler(gpt_input)
+            handler.update_request_input_tokens()
+            handler.update_total_input_tokens()
+            handlers.append(handler)
 
     time_tracker.start()
 

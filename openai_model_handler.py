@@ -1,5 +1,8 @@
 import asyncio
+import os
 from datetime import datetime
+from pprint import pprint
+
 import tiktoken
 from openai import AsyncOpenAI
 from gpt_input import ChatGptInput
@@ -7,6 +10,7 @@ from gpt_input import ChatGptInput
 
 class OpenAiModelHandler:
     def __init__(self, gpt_input: ChatGptInput):
+        # Automatically gets needed env keys from environment. No need to be explicit.
         self.client = AsyncOpenAI()
         self.input = gpt_input
         self.completion = None
@@ -23,7 +27,7 @@ class OpenAiModelHandler:
 
     async def create_prediction(self):
         start_time = datetime.now()
-        x = self.input.to_dict()
+        pprint(self.input.to_dict())
         self.completion = await self.client.chat.completions.create(
             **self.input.to_dict()
         )
