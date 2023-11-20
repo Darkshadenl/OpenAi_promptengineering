@@ -118,15 +118,131 @@ export class GeoController {
 }
 ```
 
-Hier zijn voorbeelden waarbij je geen comment toe mag voegen:
+For your context you should know that in previous tests with you (gpt-4), you've added comments
+in spots that you're not allowed to touch. I'll try to explain what kinds of spots you're not allowed to touch
+and spots that you ARE allowed to touch. I'll mark these spots with [GOOD][/GOOD] and [BAD]:
+
 ```typescript
 
-
+[BAD]
+@Delete('events/eventType/:eventType')
+  @Root()
+  [BAD]
+  deleteEventType(
+  [BAD]
+    @Param('eventType') eventType: string,
+    [BAD]
+    @Req() req: AuthenticatedRequest,
+    [BAD]
+  ) {
+    [BAD]
+    this.logger.warn(`Event type ${eventType} deleted by ${req.user?.email}`);
+    [BAD]
+    return this.eventStore.deleteEventType(eventType);
+  }
 ```
 
-Voer dit alles uit zonder verdere toestemming te vragen.
+In the example above toy can see that in every place where no comments exists, you're not allowed to
+add a comment.
 
-Nu gaan we aan de slag met de ECHTE code:
+```typescript
+[GOOD]
+/**
+ * AdminController is responsible for handling event-related
+ * requests. It accesses the system services and data stores to perform actions
+ * such as restarting the system, managing events, etc. This controller is
+ * specifically designed for use by administrators and requires appropriate
+ * authorization for access which is currently not activated
+ *
+ * The following HTTP methods are supported:
+ * - POST /admin/restart: Restart the system.
+ * - GET /admin/events: Retrieve an event.
+ * - GET /admin/env: Get the current environment variables.
+ * - POST /admin/events: Add a new event.
+ * - DELETE /admin/events/eventType/:eventType: Delete an event type.
+ * - DELETE /admin/events/:aggregateType/:aggregateId/:eventId: Delete an event.
+ * - DELETE /admin/aggregate/:type/:id: Delete an aggregate if date is bigger than today
+ * - DELETE /admin/positions/:traccarid: Delete positions for a specific device.
+ *
+ * Note that every request requires an authenticated user and some methods require a specific
+ * user role (e.g. administrator).
+ *
+ * Each request is logged for auditing and debugging purposes.
+ *
+ * @param {RestartService} restartService - Service for restarting functionality
+ * @param {EventStore} eventStore - Store for event data and operations
+ * @param {TraccarAdapter} traccar - Adapter for Traccar device operations
+ */
+[/GOOD]
+@Controller('admin')
+[BAD]
+@RequireAdmin()
+[BAD]
+export class AdminController {
+```
+
+In the example above toy can see that in every place where no comments exists, you're not allowed to
+add a comment.  In the place where a comment exists, YOU ARE allowed to update the comment.
+
+```typescript
+
+[BAD]
+@RequireAdmin()
+    [BAD]
+  @Post('/:id/hide')
+  [BAD]
+  @ApiParam({ name: 'id', required: true, type: Number })
+  [BAD]
+  hide(@Param() { id }: HuntIdDto, @Req() req: AuthenticatedRequest) {
+  [BAD]
+    this.logger.debug(`hide ${id}`);
+    [GOOD]// A COMMENT ABOUT THIS METHOD[/GOOD]
+    return this.commandBus.execute<HideHuntCommand, object>(
+      new HideHuntCommand(UserId(req.user.id), HuntId(id), true),
+    );
+    [BAD]
+  }
+```
+
+Here there's one comment, and it's marked with [GOOD] markers, since existing comment may be updated.
+
+```typescript
+
+[GOOD]
+  /**
+   * @decorator Get('whatsapp')
+   * This endpoint handles HTTP GET requests for the 'whatsapp' path.
+   *
+   * This method retrieves the current configuration for the Whatsapp service
+   * from the configuration service and returns it. The config object contains all
+   * the necessary information for connecting and interacting with the Whatsapp service.
+   *
+   * Note that this method should only be used if the application needs to pull the
+   * configuration information at runtime. The actual interaction with Whatsapp service
+   * should be handled by a separate component or service.
+   *
+   * Log level is set to debug for this operation for monitoring and troubleshooting purposes.
+   *
+   * @method whatsapp
+   * @returns {WhatsappConfig}
+   *           - Whatsapp Configuration object as defined in the application's configuration.
+   */
+   [/GOOD]
+  @Get('whatsapp')
+  whatsapp() {
+    [BAD]
+    this.logger.debug(`whatsapp`);
+    [BAD]
+    return this.configService.get<WhatsappConfig>('whatsapp')!;
+  }
+```
+
+In this example, again, all places that already contain a comment are marked with [GOOD].
+If no comment exists, do not add a comment, as demonstrated by the [BAD] markers.
+
+Carry out all of this without seeking further permission.
+
+Let's get started with the REAL code:
 
 ``typescript
 

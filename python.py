@@ -34,7 +34,7 @@ def update_handlers_metrics(handlers):
 
 async def main():
     code = add_line_numbers('code.txt')
-    code2 = add_line_numbers('code2.txt')
+    code2 = add_line_numbers('code3.txt')
     codes = [code, code2]
     system_prompt = get_text_file_string('system_prompt.txt')
     prompts = get_file_contents('prompt_1.txt')

@@ -1,0 +1,85 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Logger,
+  Param,
+  ParseFloatPipe,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
+import { RequireActiveUser } from '~/authorization';
+import { Location } from '~/domain/location.value-object';
+import { GeoService } from '~/infrastructure/geo';
+import { LocationQueryDto } from './dtos';
+
+
+/**
+ * GeoController is responsible for handling geolocation-related requests.
+ * It handles requests to get, set, delete, and query geographic location
+ * data. The controller uses GeoService for its operations, and access
+ * requires an active user.
+ *
+ * The following HTTP methods are supported:
+ * - POST /geo: Resolve the location.
+ * - GET /geo/query/:query: Query a specific location.
+ * - GET /geo/rd/:lat/:lng: Get the 'rd' of the location with the specified latitude and longitude.
+ * - GET /geo/latlng/:x/:y: Get the latitude and longitude of a location based on x and y.
+ * - GET /geo: Get all geolocations.
+ * - DELETE /geo: Clear the cache.
+ *
+ * Log messages are written at each request for debugging purposes.
+ *
+ * Note that every request requires an authenticated user.
+ *
+ * @param {GeoService} geoService - Service for geolocation operations.
+ */
+@Controller('geo')
+@RequireActiveUser()
+export class GeoController {
+  private readonly logger = new Logger('GeoController');
+  constructor(private readonly geoService: GeoService) {}
+
+  @Post()
+  resolve(@Body() location: LocationQueryDto): Promise<Location> {
+    this.logger.debug('resolve: ' + JSON.stringify({ location }));
+    return this.geoService.resolve(location);
+  }
+
+  @Get('query/:query')
+  query(@Param('query') query: string) {
+    this.logger.debug('query: ' + JSON.stringify({ query }));
+    return this.geoService.resolve({ query });
+  }
+
+  @Get('rd/:lat/:lng')
+  rd(
+    @Param('lat', new ParseFloatPipe()) lat: number,
+    @Param('lng', new ParseFloatPipe()) lng: number,
+  ) {
+    this.logger.debug('rd: ' + JSON.stringify({ lat, lng }));
+    return this.geoService.rd({ lat, lng });
+  }
+
+  // The 'latLng' function triggers when a POST request is made to 'latlng/:x/:y'. It parses 'x' and 'y' parameters as strings, TODO: should be: The 'latLng' function triggers when a GET request is made to 'latlng/:x/:y'. It parses 'x' and 'y' parameters as integers,
+  // logs the parameters, and then calls the 'latLng' function from 'mapService'. TODO: should be: logs the parameters, and then calls the 'latLng' function from 'geoService'.
+  @Get('latlng/:x/:y')
+  latLng(
+    @Param('x', new ParseIntPipe()) x: number,
+    @Param('y', new ParseIntPipe()) y: number,
+  ) {
+    this.logger.debug('latLng: ' + JSON.stringify({ x, y }));
+    return this.geoService.latLng({ x, y });
+  }
+
+  @Get()
+  get() {
+    return this.geoService.getAll();
+  }
+
+  @Delete()
+  delete() {
+    return this.geoService.clearCache();
+  }
+}

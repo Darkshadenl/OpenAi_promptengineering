@@ -1,0 +1,28 @@
+Here's additional rules to better be able to determine if a comment is wrong:
+
+The comment should precisely describe what the code is doing or why certain decisions were made, without being overly broad or generic.
+If a comment is meant to explain a complex algorithm or workflow, it should break down the explanation into specific steps or stages.
+Comments must pertain directly to the code they are annotating. Irrelevant comments can mislead or confuse a developer, leading to misunderstanding or misuse of the code.
+Comments should not state the obvious or reiterate what can be clearly inferred from the code itself, as this does not add value and clutters the codebase.
+Comments should provide information that can be acted upon, rather than aspirational or vague goals. For example, a TODO comment should specify a clear action item, not an unreachable or ill-defined objective.
+Comments should address why non-obvious code decisions were made, explaining the rationale behind a chosen approach, especially if multiple alternatives exist.
+A comment should give context to complex business logic or domain-specific considerations, providing clarity to developers unfamiliar with the domain.
+Inline comments must target specific blocks of code or statements to which they apply, avoiding confusion about their scope.
+Each comment should relate to the latest version of the codebase; obsolete comments must be updated or removed to prevent discrepancies.
+Comments should anticipate the developer's questions or potential confusion, offering insights that the code cannot convey on its own.
+Achieve this goal by updating existing comments. Don't add new comments on lines without comments.
+Comments should clarify the intended use and edge cases of functions, classes, and modules, particularly when their behavior is not immediately clear from their signatures or names,
+but you are not allowed to add new comments to achieve this goal. Stick to updating existing comments.
+When referring to code refactoring or optimization, comments should provide actionable items that can be addressed in the current scope of work or project roadmap.
+Comments should avoid redundancy by not simply repeating what is already evident in the code, but rather providing additional insight or explanation.
+If a block of code has been commented out, there should be an accompanying comment explaining why it is being retained in the codebase, such as potential reuse in the future or historical significance.
+Comments should use clear and concise language, avoiding overly technical jargon when possible to make the codebase accessible to developers with various levels of expertise.
+Documentation comments for functions, classes, and interfaces should follow TypeScript's JSDoc conventions to ensure that automated documentation tools can correctly generate the project's documentation.
+The consistency of terminology within comments should be checked. Terms, variable names, and function names within comments should match those in the code.
+Consistent voice and tense should be maintained in all comments throughout the codebase.
+Ensure comments are contextually relevant to the code they accompany. This could involve checking for code keywords and ensuring they are also present in the comment.
+Detect possible outdated comments by checking for discrepancies between the comment content and the code logic or structure.
+Comments that contain temporal language (e.g., "temporary fix", "as of version 2.0") should be flagged for review to ascertain if they are still applicable.
+For JSDoc comments, the program should verify that all documentation tags (e.g., @param, @return) are used correctly and correspond to actual parameters or return types of functions.
+Identify comments that explain "what" the code is doing if the "what" is already clearly expressed by the code itself. Such comments should be flagged as potential candidates for removal to reduce noise.
+Comments that are vague or non-informative (e.g., "performs the operation") should be flagged for further improvement to clarify their intent or to be made more specific.
