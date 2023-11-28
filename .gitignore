@@ -1,4 +1,8 @@
 /venv/
 /node_modules/
+/.vscode/
+/.idea/
+/output/
+/code_files/
 .env
 openai_model_handler.db
