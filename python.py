@@ -1,3 +1,5 @@
+import os
+
 from dotenv import load_dotenv
 
 from add_line_numbers import add_line_numbers
@@ -10,6 +12,8 @@ import asyncio
 load_dotenv()
 models = ["gpt-4-1106-preview"]
 time_tracker = Timetracker()
+save_to_database = False
+save_to_output = True
 
 
 def get_text_file_string(filename) -> str:
@@ -32,10 +36,27 @@ def update_handlers_metrics(handlers):
         handler.update_request_output_tokens()
 
 
+def loop_code_files_and_return_array():
+    folder = "code_files"
+    files = []
+    for dirpath, dirnames, filenames in os.walk(folder):
+        for filename in [f for f in filenames if f.endswith(".ts")]:
+            files.append(os.path.join(dirpath, filename))
+
+    # return array
+    return files
+
+
+
 async def main():
-    code = add_line_numbers('code.txt')
-    code2 = add_line_numbers('code3.txt')
-    codes = [code, code2]
+    codes = loop_code_files_and_return_array()
+    # code = add_line_numbers('code.txt')
+
+    code_with_lines = []
+    for c in codes:
+        code_with_lines.append((f"./{c}", add_line_numbers(c)))
+
+    # code_with_lines.append(("./code_files/code.txt", code))
     system_prompt = get_text_file_string('system_prompt.txt')
     prompts = get_file_contents('prompt_1.txt')
     prompts_left = len(prompts)
@@ -43,10 +64,22 @@ async def main():
 
     # first round so always prompt_1
     for model in models:
-        for c in codes:
-            prompt_w_code = prompts['prompt_1.txt'].replace('${code}', c)
+        for c in code_with_lines:
+            if isinstance(c, tuple):
+                prompt_w_code = prompts['prompt_1.txt'].replace('${code}', c[1])
+            elif isinstance(c, str):
+                prompt_w_code = prompts['prompt_1.txt'].replace('${code}', c)
+            else:
+                raise Exception('code is not a string or tuple')
+
             gpt_input = ChatGptInput(prompt_w_code, system_prompt, model)
-            handler = OpenAiModelHandler(gpt_input)
+            if isinstance(c, tuple):
+                handler = OpenAiModelHandler(gpt_input, c[0])
+            elif isinstance(c, str):
+                handler = OpenAiModelHandler(gpt_input)
+            else:
+                raise Exception('code is not a string or tuple')
+
             handler.update_request_input_tokens()
             handler.update_total_input_tokens()
             handlers.append(handler)
@@ -73,17 +106,32 @@ async def main():
     print(f"Total time: {time_tracker.total_time}\n")
 
     for handler in handlers:
-        user_correct = input(f"\x1b[31mWas {handler.input.model}'s output Correct? y/n\x1b[0m")
         correct = False
 
-        if user_correct == 'y':
-            correct = True
+        if save_to_database:
+            user_correct = input(f"\x1b[31mWas {handler.input.model}'s output Correct? y/n\x1b[0m")
+
+            if user_correct == 'y':
+                correct = True
 
         all_messages = [message['content'] for message in handler.input.messages]
         merged_messages = ' '.join(all_messages)
         handler.calculate_total_time()
-        save_to_db(handler, merged_messages, correct)
 
+        if save_to_database:
+            save_to_db(handler, merged_messages, correct)
+
+        if save_to_output:
+            output_path = handler.filepath.replace('code_files', 'output')
+
+            # Create directory if it does not exist
+            directory = os.path.dirname(output_path)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
+            # Write to the file (will create if file does not exist, or overwrite if it does)
+            with open(output_path, 'w') as output_file:
+                output_file.write(all_messages[-1])
 
 
 if __name__ == '__main__':

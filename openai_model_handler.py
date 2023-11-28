@@ -9,7 +9,8 @@ from gpt_input import ChatGptInput
 
 
 class OpenAiModelHandler:
-    def __init__(self, gpt_input: ChatGptInput):
+    def __init__(self, gpt_input: ChatGptInput, filepath: str = None):
+        self.filepath = filepath
         # Automatically gets needed env keys from environment. No need to be explicit.
         self.client = AsyncOpenAI()
         self.input = gpt_input
