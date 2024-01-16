@@ -1,8 +1,6 @@
 import os
-
 from dotenv import load_dotenv
-
-from add_line_numbers import add_line_numbers
+from add_line_numbers import add_line_numbers, read_file
 from console import print_pre_response_output_of_handler, print_post_response_output_of_handler
 from database import setup_db, save_to_db
 from openai_model_handler import OpenAiModelHandler, ChatGptInput
@@ -54,11 +52,11 @@ async def main():
 
     code_with_lines = []
     for c in codes:
-        code_with_lines.append((f"./{c}", add_line_numbers(c)))
+        code_with_lines.append((f"./{c}", read_file(c)))
 
     # code_with_lines.append(("./code_files/code.txt", code))
     system_prompt = get_text_file_string('system_prompt.txt')
-    prompts = get_file_contents('prompt_1.txt')
+    prompts = get_file_contents('prompt_for_creating_faulty_comments.txt')
     prompts_left = len(prompts)
     handlers = []
 
@@ -66,9 +64,9 @@ async def main():
     for model in models:
         for c in code_with_lines:
             if isinstance(c, tuple):
-                prompt_w_code = prompts['prompt_1.txt'].replace('${code}', c[1])
+                prompt_w_code = prompts['prompt_for_creating_faulty_comments.txt'].replace('${code}', c[1])
             elif isinstance(c, str):
-                prompt_w_code = prompts['prompt_1.txt'].replace('${code}', c)
+                prompt_w_code = prompts['prompt_for_creating_faulty_comments.txt'].replace('${code}', c)
             else:
                 raise Exception('code is not a string or tuple')
 

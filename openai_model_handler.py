@@ -81,7 +81,10 @@ class OpenAiModelHandler:
         print_task.cancel()
         print(f"\x1b[32m{self.input.model} finished in {self.calculate_total_time()}\x1b[0m")
 
+    def get_filename(self):
+        return os.path.basename(self.filepath)
+
     async def print_status_every(self, seconds):
         while True:
-            print("\033[93m" + f"{self.input.model} is still running..." + "\033[0m")
+            print("\033[93m" + f"{self.input.model} is still running...{self.get_filename()}" + "\033[0m")
             await asyncio.sleep(seconds)

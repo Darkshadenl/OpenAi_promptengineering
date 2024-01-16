@@ -10,5 +10,10 @@ def add_line_numbers(filename):
     return ''.join(numbered_lines)
 
 
+def read_file(filename: str) -> str:
+    with open(filename, 'r') as file:
+        return file.read()
+
+
 if __name__ == '__main__':
     print(add_line_numbers("code.txt"))
