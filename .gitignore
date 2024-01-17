@@ -6,3 +6,4 @@
 /code_files/
 .env
 openai_model_handler.db
+/backup_code_files/

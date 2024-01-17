@@ -34,12 +34,17 @@ def update_handlers_metrics(handlers):
         handler.update_request_output_tokens()
 
 
-def loop_code_files_and_return_array():
-    folder = "code_files"
+def loop_files_in_folder_and_return_array(foldername: str) -> list:
     files = []
-    for dirpath, dirnames, filenames in os.walk(folder):
-        for filename in [f for f in filenames if f.endswith(".ts")]:
-            files.append(os.path.join(dirpath, filename))
+    for dirpath, dirnames, filenames in os.walk(foldername):
+        if foldername == "code_files":
+            for filename in [f for f in filenames if f.endswith(".ts")]:
+                # search for code files
+                files.append(os.path.join(dirpath, filename))
+        elif foldername == "prompts":
+            for filename in [f for f in filenames if f.endswith(".txt")]:
+                # search for prompt files
+                files.append(os.path.join(dirpath, filename))
 
     # return array
     return files
@@ -47,22 +52,23 @@ def loop_code_files_and_return_array():
 
 
 async def main():
-    codes = loop_code_files_and_return_array()
+    codes = loop_files_in_folder_and_return_array('code_files')
     # code = add_line_numbers('code.txt')
 
-    code_with_lines = []
+    filename_code_tuples = []
     for c in codes:
-        code_with_lines.append((f"./{c}", read_file(c)))
+        filename_code_tuples.append((f"./{c}", read_file(c)))
 
     # code_with_lines.append(("./code_files/code.txt", code))
     system_prompt = get_text_file_string('system_prompt.txt')
-    prompts = get_file_contents('prompt_for_creating_faulty_comments.txt')
+    prompts = loop_files_in_folder_and_return_array('prompts')
+    prompts = get_file_contents(*prompts)
     prompts_left = len(prompts)
     handlers = []
 
     # first round so always prompt_1
     for model in models:
-        for c in code_with_lines:
+        for c in filename_code_tuples:
             if isinstance(c, tuple):
                 prompt_w_code = prompts['prompt_for_creating_faulty_comments.txt'].replace('${code}', c[1])
             elif isinstance(c, str):
