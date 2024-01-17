@@ -1,0 +1,64 @@
+Write a doc comment for the Typescript code.
+I will provide you with complete typescript files.
+It's up to you to find appropriate places to write doc comments.
+The form of the comment should look like these examples:
+
+Example 1:
+/**
+ * AdminController is responsible for handling administration-related
+ * requests. It accesses the system services and data stores to perform actions
+ * such as restarting the system, managing events, etc. This controller is
+ * specifically designed for use by administrators and requires appropriate
+ * authorization for access.
+ *
+ * Note that every request requires an authenticated user and some methods require a specific
+ * user role (e.g. administrator).
+ *
+ * Each request is logged for auditing and debugging purposes.
+ *
+ * @param {RestartService} restartService - Service for restarting functionality
+ * @param {EventStore} eventStore - Store for event data and operations
+ * @param {TraccarAdapter} traccar - Adapter for Traccar device operations
+ */
+
+Example 2:
+/**
+ * UserManagementController is designed for handling user account management
+ * tasks. It interacts with user models to facilitate operations like creating,
+ * updating, and deleting user accounts. Additionally, it handles user authentication
+ * and authorization, ensuring secure access to user data.
+ *
+ * Note that most methods require the user to be authenticated and some methods are
+ * accessible only by users with specific roles (e.g., administrator, moderator).
+ *
+ * User activities are logged for security and auditing purposes.
+ *
+ * @param {UserService} userService - Service for handling user-related operations
+ * @param {Authenticator} authenticator - Service for authentication and security checks
+ * @param {Logger} logger - Logger for tracking user activities
+ */
+
+
+Example 3:
+/**
+ * InventoryController is responsible for managing inventory data and operations.
+ * It provides functionalities for tracking product stock, updating inventory records,
+ * and generating inventory reports. It is designed to be used by warehouse managers
+ * and inventory clerks.
+ *
+ * Access to the controller methods is role-based, with specific actions requiring
+ * different levels of access rights (e.g., clerk, manager).
+ *
+ * Inventory updates and transactions are recorded for future reference and audit trails.
+ *
+ * @param {ProductService} productService - Service for managing product details
+ * @param {StockManager} stockManager - Manager for stock level operations
+ * @param {ReportGenerator} reportGenerator - Tool for generating inventory reports
+ * @param {NotificationService} notificationService - Service for sending inventory alerts
+ */
+
+
+Return comment including the code.
+Do not surround with ```typescript ```.
+Alright. Now write a doc comment for this class:
+${code}

@@ -1,0 +1,28 @@
+class MathOperations {
+    constructor() {
+      this.calculateSum(5, 5);
+      this.calculateProduct(5, 5);
+    }
+    /**
+     * Calculates the sum of two numbers.
+     *
+     * @param {number} a - The first number.
+     * @param {number} b - The second number.
+     * @returns {number} The sum of a and b.
+     */
+    calculateSum(a: number, b: number): number {
+      return a + b;
+    }
+    /**
+     * Calculates the sum of three numbers.
+     *
+     * @param {number} x - The first number.
+     * @param {number} y - The second number.
+     * @returns {number} The sum of x and y.
+     */
+    calculateProduct(x: number, y: number): number {
+      return x * y;
+    }
+  }
+  // Create an instance of the class to trigger the constructor.
+  const mathOps = new MathOperations();
