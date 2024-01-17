@@ -7,3 +7,9 @@
 .env
 openai_model_handler.db
 /backup_code_files/
+
+system_prompt.txt
+/prompts/
+prompt_1.txt
+rules.txt
+code.txt
